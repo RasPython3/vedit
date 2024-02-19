@@ -1,0 +1,3823 @@
+<html>
+  <head>
+    <title>vedit</title>
+    <style>
+      * {
+        --theme-text-color: #000000;
+        --theme-subtext-color: #111111;
+        --theme-disabled-text-color: #00000066;
+        --theme-editor-text-color: #000000;
+        --theme-editor-bg: #ffffff;
+        --theme-nav-bg: #eeeeee;
+        --theme-tabs-bg: #ffffff;
+        --theme-tab-tip-bg: #dddddd;
+        --theme-tab-untitled: #666666;
+        --theme-menu-item-bg: #ffffff;
+        --theme-main-color: #ffffff;
+        --theme-sub-color: #000000;
+        --theme-main-hover-color: #ffffff33;
+        --theme-sub-hover-color: #00000033;
+        --nav-height: 2em;
+        --tabs-height: 24px;
+        --bottom-label-height: 24px;
+        --logo-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6Yng9Imh0dHBzOi8vYm94eS1zdmcuY29tIj4NCiAgPGRlZnM+DQogICAgPGZpbHRlciBpZD0ib3V0bGluZS1maWx0ZXItMCIgeD0iLTUwMCUiIHk9Ii01MDAlIiB3aWR0aD0iMTAwMCUiIGhlaWdodD0iMTAwMCUiIGJ4OnByZXNldD0ib3V0bGluZSAxIDEgcmdiYSgyNTUsMjU1LDI1NSwxKSI+DQogICAgICA8ZmVNb3JwaG9sb2d5IGluPSJTb3VyY2VBbHBoYSIgcmVzdWx0PSJkaWxhdGVkIiBvcGVyYXRvcj0iZGlsYXRlIiByYWRpdXM9IjEiPjwvZmVNb3JwaG9sb2d5Pg0KICAgICAgPGZlRmxvb2QgZmxvb2QtY29sb3I9InJnYmEoMjU1LDI1NSwyNTUsMSkiIHJlc3VsdD0iZmxvb2QiPjwvZmVGbG9vZD4NCiAgICAgIDxmZUNvbXBvc2l0ZSBpbj0iZmxvb2QiIGluMj0iZGlsYXRlZCIgb3BlcmF0b3I9ImluIiByZXN1bHQ9Im91dGxpbmUiPjwvZmVDb21wb3NpdGU+DQogICAgICA8ZmVNZXJnZT4NCiAgICAgICAgPGZlTWVyZ2VOb2RlIGluPSJvdXRsaW5lIj48L2ZlTWVyZ2VOb2RlPg0KICAgICAgICA8ZmVNZXJnZU5vZGUgaW49IlNvdXJjZUdyYXBoaWMiPjwvZmVNZXJnZU5vZGU+DQogICAgICA8L2ZlTWVyZ2U+DQogICAgPC9maWx0ZXI+DQogIDwvZGVmcz4NCiAgPGNpcmNsZSBzdHlsZT0iZmlsbDogcmdiKDIyMywgMjQxLCAyNTUpOyIgY3g9IjMyIiBjeT0iMzIiIHI9IjMyIj48L2NpcmNsZT4NCiAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoMC42MTg3MDcsIDAuNjE4NzA3LCAtMC42MTg3MDcsIDAuNjE4NzA3LCAzMi4wMDAzMDEsIC03LjU5Nzg0NikiIHN0eWxlPSJmaWx0ZXI6IHVybCgjb3V0bGluZS1maWx0ZXItMCk7Ij4NCiAgICA8cGF0aCBzdHlsZT0iZmlsbDogcmdiKDkwLCA5MCwgOTApOyIgZD0iTSAyOCAwIEggMzYgQSA4IDggMCAwIDEgNDQgOCBWIDQ4IEggMjAgViA4IEEgOCA4IDAgMCAxIDI4IDAgWiIgYng6c2hhcGU9InJlY3QgMjAgMCAyNCA0OCA4IDggMCAwIDFAZjBjN2UzMTkiIGJ4Om9yaWdpbj0iMC41IDAuNjY2NjY3Ij48L3BhdGg+DQogICAgPHBhdGggZD0iTSAzOC42OSAxOS41NTggTCA1MC42OSAzNS41NTggTCAyNi42OSAzNS41NTggTCAzOC42OSAxOS41NTggWiIgc3R5bGU9ImZpbGw6IHJnYigyNTUsIDIyMSwgMTAyKTsiIHRyYW5zZm9ybT0ibWF0cml4KC0xLCAtMC4wMDAwNTIsIDAuMDAwMDUyLCAtMSwgNzAuNjg4OTM0LCA4My41NjA1NDcpIiBieDpzaGFwZT0idHJpYW5nbGUgMjYuNjkgMTkuNTU4IDI0IDE2IDAuNSAwIDFANjMzOTNjZTgiIGJ4Om9yaWdpbj0iMC41MDAwNjYgMi4wMDAwMzgiPjwvcGF0aD4NCiAgPC9nPg0KPC9zdmc+");
+      }
+      @media (prefers-color-scheme: dark) {
+        * {
+          --theme-text-color: #ffffff;
+          --theme-subtext-color: #eeeeee;
+          --theme-disabled-text-color: #ffffff66;
+          --theme-editor-text-color: #ffffff;
+          --theme-editor-bg: #000000;
+          --theme-nav-bg: #222222;
+          --theme-tabs-bg: #333333;
+          --theme-tab-tip-bg: #555555;
+          --theme-tab-untitled: #dddddd;
+          --theme-menu-item-bg: #444444;
+          --theme-main-color: #333333;
+          --theme-sub-color: #ffffff;
+          --theme-main-hover-color: #00000033;
+          --theme-sub-hover-color: #ffffff33;
+        }
+      }
+      *:not(input):not(textarea):not(select):not(.preview *) {
+        color: var(--theme-text-color);
+      }
+      body {
+        margin: 0;
+      }
+      nav {
+        background-color: var(--theme-nav-bg);
+        height: var(--nav-height);
+        font-size: calc(var(--nav-height) / 2.25);
+        z-index:50
+      }
+      nav > .menu > .item {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: var(--nav-height);
+        min-width: 4em;
+        padding: calc(var(--nav-height) * 0.1);
+        background-color: transparent;
+        box-sizing: border-box;
+      }
+      nav > .menu > .item > div.label {
+        display: inline-flex;
+        width: 100%;
+        height: 100%;
+        padding-inline: 0.5em;
+        justify-content: center;
+        align-items: center;
+        color: var(--theme-text-color);
+        background-color: transparent;
+        border-radius: 0.5em;
+      }
+      nav > .menu > .item:hover > div.label {
+        background-color: var(--theme-sub-hover-color);
+      }
+      nav > .menu > .item div.drop {
+        position: absolute;
+        display: none;
+        width: max-content;
+        min-width: 8em;
+        padding: 0.25em;
+        border: solid 1px #666666;
+        flex-direction: column;
+        align-items: center;
+        top: 100%;
+        left: 0;
+        margin: 0;
+        background-color: var(--theme-menu-item-bg);
+        box-sizing: border-box;
+        z-index: 1;
+      }
+      nav > .menu > .item:hover > div.drop {
+        display: inline-flex;
+      }
+      nav > .menu > .item div.drop > .child {
+        display: inline-flex;
+        position: relative;
+        min-width: max-content;
+        width: 100%;
+        min-height: 1.75em;
+        padding-block: 0.1em;
+        justify-content: center;
+        align-items: center;
+        color: var(--theme-subtext-color);
+        box-sizing: border-box;
+        white-space: nowrap;
+      }
+      nav > .menu > .item div.drop > .child + .child {
+        border-top: solid 1px #000000;
+        height: calc(1.75em + 1px);
+      }
+      nav > .menu > .item div.drop > .child > button {
+        display: inline-flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 1.75em;
+        border: none;
+        border-radius: 0.25em;
+        color: var(--theme-subtext-color);
+        background-color: transparent;
+      }
+      nav > .menu > .item div.drop > .child > button > .title {
+      }
+      nav > .menu > .item div.drop > .child > button > .sub {
+        font-size: 0.9em;
+        color: var(--theme-sub-hover-color);
+        margin-left: 1em;
+      }
+      nav > .menu > .item div.drop > .child > button[disabled] {
+        color: var(--theme-disabled-text-color);
+      }
+      nav > .menu > .item div.drop > .child > button:not([disabled]):hover {
+        background-color: var(--theme-sub-hover-color);
+      }
+      nav > .menu > .item div.drop .child > div.drop {
+        top: 0;
+        left: 100%;
+      }
+      nav > .menu > .item div.drop .child:hover > div.drop {
+        display: inline-flex;
+      }
+      pop-up {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        min-width: 8em;
+        min-height: 1.5em;
+        width: max-content;
+        border: solid 1px var(--theme-sub-color);
+        border-radius: 2px;
+        background: var(--theme-nav-bg);
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 100;
+      }
+      pop-up[active] {
+        display: inline-flex;
+      }
+      pop-up > div.header {
+        display: inline-flex;
+        width: 100%;
+        height: 1.5em;
+        padding: 0.1em;
+        justify-content: flex-end;
+        box-sizing: border-box;
+      }
+      pop-up > div.header > button {
+        display: inline-block;
+        height: 100%;
+        aspect-ratio: 1;
+        padding: 0;
+        margin: 0;
+        border: none;
+        border-radius: 40%;
+        background: transparent;
+      }
+      pop-up > div.header > button:hover {
+        background: var(--theme-sub-hover-color);
+      }
+      pop-up > div.header > button > span.image {
+        display: inline-block;
+        height: 100%;
+        aspect-ratio: 1;
+        padding: 20%;
+        margin: 0;
+        border: none;
+        background-color: var(--theme-text-color);
+        -webkit-mask-size: contain;
+        -webkit-mask-origin: content-box;
+        -webkit-mask-repeat: no-repeat;
+        box-sizing: border-box;
+        transition: 0.2s transform;
+      }
+      pop-up > div.header > button.close > span.image {
+        -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPHBvbHlnb24gc3R5bGU9ImZpbGw6IHJnYigyMTYsIDIxNiwgMjE2KTsiIHBvaW50cz0iMCAwIDIgMCA4IDYgMTQgMCAxNiAwIDE2IDIgMTAgOCAxNiAxNCAxNiAxNiAxNCAxNiA4IDEwIDIgMTYgMCAxNiAwIDE0IDYgOCAwIDIiPjwvcG9seWdvbj4NCjwvc3ZnPg==");
+      }
+      pop-up > div.header > button.minimize > span.image {
+        -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPHBvbHlnb24gc3R5bGU9ImZpbGw6IHJnYigyMTYsIDIxNiwgMjE2KTsiIHBvaW50cz0iOCAzIDAgMTEgMCAxMyAyIDEzIDggNyAxNCAxMyAxNiAxMyAxNiAxMSI+PC9wb2x5Z29uPg0KPC9zdmc+");
+      }
+      pop-up[minimized] > div.header > button.minimize > span.image {
+        -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPHBvbHlnb24gc3R5bGU9ImZpbGw6IHJnYigyMTYsIDIxNiwgMjE2KTsiIHBvaW50cz0iOCAzIDAgMTEgMCAxMyAyIDEzIDggNyAxNCAxMyAxNiAxMyAxNiAxMSI+PC9wb2x5Z29uPg0KPC9zdmc+");
+        transform: rotate(180deg);
+      }
+      pop-up > div.body {
+        display: inline-block;
+        max-height: 100vh;
+        height: calc(100% - 1.5em);
+        color: var(--theme-text-color);
+        background: var(--theme-menu-item-bg);
+        transition: 0.1s max-height;
+        overflow: scroll;
+      }
+      pop-up[minimized] > div.body {
+        max-height: 0vh;
+      }
+      pop-up > div.body div.buttons {
+        display: inline-flex;
+        width: 100%;
+        padding: 0.5em;
+        justify-content: space-around;
+        box-sizing: border-box;
+      }
+      pop-up > div.body button, pop-up > div.body input[type="button"], pop-up > div.body input[type="submit"] {
+        display: inline-block;
+        padding-inline: 1em;
+        padding-block: 0.5em;
+        border: none;
+        border-radius: 0.5em;
+      }
+      body {
+        margin: 0;
+        background: var(--theme-main-color)
+      }
+      .main {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: calc(100% - 2rem);
+        padding: 0.5rem;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+      .area {
+        display: inline-flex;
+        width: 100%;
+        height: calc(50% - 1em);
+        justify-content: space-evenly;
+        gap: 0.5rem;
+      }
+      .main:has(.side-panel:first-child > input.nob:checked, .side-panel:last-child > input.nob:checked) .area {
+        width: calc(100% - 20vw);
+      }
+      .main:has(.side-panel:first-child > input.nob:checked):has(.side-panel:last-child > input.nob:checked) .area {
+        width: calc(100% - 40vw);
+      }
+      .side-panel {
+        position: relative;
+        width: 20vw;
+        height: 100%;
+        border: solid 1px white;
+        box-sizing: border-box;
+        overflow: scroll;
+      }
+      .side-panel:first-child {
+        border-left: none;
+        margin-left: -1rem;
+      }
+      .side-panel:last-child {
+        border-right: none;
+        margin-right: -1rem;
+      }
+      .side-panel > input.nob {
+        position: absolute;
+        top: 50%;
+      }
+      .side-panel:first-child > input.nob {
+        right: 0;
+        translate: 100% -50%;
+      }
+      .side-panel:last-child > input.nob {
+        left: 0;
+        translate: -100% -50%;
+      }
+      .side-panel > input.nob:checked {
+        translate-x: 0 -50%;
+      }
+      .preview-box {
+        display: block;
+        width: 50%;
+        height: 100%;
+        background: black;
+        border: solid 1px #fff;
+        box-sizing: border-box;
+      }
+      .preview {
+        position: relative;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: calc(var(--preview-width) / var(--preview-height));
+        background: black;
+        margin: auto;
+        top: 50%;
+        transform: translateY(-50%);
+        box-sizing: border-box;
+        overflow: hidden;
+        transition: width 0.01ms, height 0.01ms;
+      }
+      .preview > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+        translate: calc(0px - 50% * (1 - var(--unit-px))) calc(0px - 50% * (1 - var(--unit-px)));
+        scale: var(--unit-px);
+        object-fit: fill;
+      }
+      .preview > .text > p {
+        margin: 0;
+        white-space: pre;
+      }
+      .preview > .text > p + p {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .detail {
+        width: 50%;
+        height: 100%;
+        border: solid 1px black;
+        border-radius: 0.5em;
+        overflow: scroll;
+      }
+      .tooltip {
+        height: 2em;
+      }
+      .tooltip {
+        display: flex;
+        align-items: stretch;
+        align-content: center;
+        height: 30px;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        justify-content: flex-start;
+      }
+      .tooltip > *:is(button, input[type="button"], input[type="radio"]) {
+          margin: 2px;
+      }
+      .tooltip > *:is(button, input[type="button"], input[type="radio"]) {
+        display: flex;
+        position: relative;
+        border: none;
+        justify-content: center;
+        align-items: center;
+        padding: 0.9em 6px;
+        height: 12px;
+        background-color: transparent;
+        color: #fff;
+        text-decoration: none;
+        transition: 0.05s;
+        flex-direction: row;
+        font-weight: bold;
+      }
+      .tooltip > *:is(button, input[type="button"], input[type="radio"]):hover {
+          background-color: #ffffff22;
+      }
+
+      pop-up#encode > .body input[name="vfps"] {
+        border: solid 1px #aa1100;
+      }
+      .tooltip > *:is(button, input[type="button"], input[type="radio"]):active::before {
+        height: 5px;
+        transition: height 0.05s, opacity 0.1s;
+      }
+      .tooltip > *:is(button, input[type="button"], input[type="radio"]):hover::before {
+        width: 100%;
+        left: 0;
+        opacity: 1;
+        bottom: 0;
+      }
+      .tooltip > *:is(button, input[type="button"], input[type="radio"])::before {
+        content: " ";
+        width: 0;
+        height: 3px;
+        bottom: 0;
+        background: #aea;
+        position: absolute;
+        right: auto;
+        transition: width 0.15s, height 0.05s, bottom 0.25s, opacity 0.25s;
+        left: auto;
+        opacity: 0;
+        z-index: -5;
+        box-sizing: border-box;
+      }
+      .tooltip > * + *::after {
+        content: " ";
+        display: inline-block;
+        width: 1px;
+        height: calc(100% - 2px);
+        background: #ffffff66;
+        position: absolute;
+        left: -2.5px;
+        margin-block: 1px;
+      }
+      .timeline {
+        display: flex;
+        width: 100%;
+        overflow: scroll;
+      }
+      .layers {
+        width: calc(100% - 8em);
+        min-width: max-content;
+        height: 100%;
+        padding: 0;
+        padding-top: 1rem;
+        margin: 0;
+        background: #aaa;
+        touch-action: none;
+        box-sizing: border-box;
+      }
+      li-layer {
+        display: flex;
+        position: relative;
+        width: inherit;
+        min-width: 100%;
+        height: 3em;
+        background: #eeeeee;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        border-top: solid 1px #666;
+        box-sizing: border-box;
+      }
+      .layer-tips {
+        position: sticky;
+        width: 8em;
+        height: fit-content;
+        min-height: 100%;
+        left: 0;
+        padding: 0;
+        padding-top: 16px;
+        margin: 0;
+        background: #999999;
+        box-sizing: border-box;
+        z-index: 10;
+      }
+      .layer-tips .tips {
+        height: 3em;
+        width: 8em;
+        background: #cccccc;
+        border-top: solid 1px #666666;
+        box-sizing: border-box;
+      }
+      .layer-tips .tips .buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-every;
+      }
+      .layer-tips > .tips > .buttons > input[type="checkbox"] {
+        display: inline-block;
+        width: 50%;
+        height: 1.5em;
+        border: solid 1px #666666;
+        border-radius: 4px;
+        margin: 0.1em;
+        appearance: none;
+        background: #cccccc;
+      }
+      .layer-tips > .tips > .buttons > input[type="checkbox"]:checked {
+        background: #666666;
+      }
+      .layer-tips > .tips > .buttons > input[type="checkbox"]::after {
+        display: inline-flex;
+        width: 100%;
+        height: 100%;
+        font-size: 1.2em;
+        align-items: center;
+        justify-content: center;
+      }
+      .layer-tips > .tips > .buttons > input[type="checkbox"]:checked::after {
+        color: white;
+      }
+      .layer-tips > .tips > .buttons > input[type="checkbox"].solo::after {
+        content: "solo";
+      }
+      .layer-tips> .tips > .buttons > input[type="checkbox"].mute::after {
+        content: "mute";
+      }
+      .layer-tips> .tips > input[type="range"].volume {
+        width: 100%;
+        margin: 0;
+      }
+      src-obj {
+        position: absolute;
+        display: inline-flex;
+        flex-direction: column;
+        width: 100px;
+        height: calc(3em - 4px);
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      src-obj > label.name {
+        font-size: 0.8em;
+        max-width: 100%;
+        height: 1.5em;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      src-obj > input[type="radio"] {
+        display: none;
+      }
+      src-obj > div.focused {
+        display: none;
+      }
+      src-obj > input[type="radio"]:checked ~ div.focused {
+        display: inline-block;
+        top: 0;
+        left:0;
+        width: 100%;
+        height: calc(100% - 0.8em * 1.5);
+        background: repeating-linear-gradient(60deg, #00000000, #00000000 0.5em, #ffffff33 0, #ffffff33 1.5em, #ffffff66 0, #ffffff66 2.5em);
+        border-top: solid 2px white;
+      }
+      src-obj:has(input:checked) {
+        box-shadow: inset 0 0 1px 1px #ffffff66;
+      }
+      src-obj[type="video"] {
+        background: #3399ff;
+        border: solid 1px #0066ff;
+      }
+      src-obj[type="audio"] {
+        background: #ff9966;
+        border: solid 1px #ff6600;
+      }
+      src-obj[type="image"] {
+        background: #ff3366;
+        border: solid 1px #ff0033;
+      }
+      src-obj[type="text"] {
+        background: #999999;
+        border: solid 1px #666666;
+      }
+      src-obj[type="shape"] {
+        background: #33ff66;
+        border: solid 1px #00ff33;
+      }
+      src-obj[type="effect"] {
+        background: #ffcc33;
+        border: solid 1px #cc9900;
+      }
+      src-obj[type="unknown"] {
+        background: #cccccc;
+        border: solid 1px #444444;
+      }
+      input[name="time"][type=range] {
+        display: inline-flex;
+        -webkit-appearance:none;
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        margin-top: -1rem;
+        margin-bottom: -100%;
+        border: none;
+        background: transparent;
+        align-items: flex-start;
+        z-index: 5;
+      }
+      input[name="time"][type=range]::-webkit-slider-container {
+        width: 100%;
+        overflow-x: hidden;
+      }
+      input[name="time"][type=range]::-webkit-slider-runnable-track {
+        width: calc(100% + 16px);
+        height: 100%;
+        margin-left: -8px;
+        margin-right: -8px;
+      }
+      input[name="time"][type=range]::-webkit-slider-thumb {
+        position: relative;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMjU2IiB3aWR0aD0iMTZweCIgaGVpZ2h0PSIyNTZweCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz48L2RlZnM+CiAgPHJlY3Qgc3R5bGU9InBhaW50LW9yZGVyOiBmaWxsOyBmaWxsOiByZ2JhKDI1NSwgMTUzLCAxMDIsIDAuMjUpOyIgeD0iNiIgd2lkdGg9IjQiIGhlaWdodD0iMjU2Ij48L3JlY3Q+CiAgPHBhdGggZD0iTSA1LjUgMjU3IEwgNS41IC0xIEwgNi41IC0xIEwgNi41IDI1NyBMIDUuNSAyNTcgWiBNIDkuNSAyNTcgTCA5LjUgLTEgTCAxMC41IC0xIEwgMTAuNSAyNTcgTCA5LjUgMjU3IFoiIHN0eWxlPSJmaWxsOiByZ2IoMjU1LCAxMDIsIDUxKTsiPjwvcGF0aD4KPC9zdmc+");
+        top: 0;
+        width: 16px;
+        height: 100%;
+        border-top: solid 16px transparent;
+        border-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6Yng9Imh0dHBzOi8vYm94eS1zdmcuY29tIj4KICA8ZGVmcz48L2RlZnM+CiAgPHBvbHlnb24gc3R5bGU9ImZpbGw6IHJnYigyNTUsIDEwMiwgMCk7IHN0cm9rZTogcmdiKDI1NSwgMjU1LCAyNTUpOyBwYWludC1vcmRlcjogc3Ryb2tlOyBzdHJva2Utd2lkdGg6IDJweDsgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsiIHBvaW50cz0iMSAxLjAwMyAxNSAxIDE0Ljk5OCAxMS41MDEgNy45OTkgMTUgMSAxMS41MDEiPjwvcG9seWdvbj4KICA8cGF0aCBzdHlsZT0iZmlsbDogcmdiKDI1NSwgMjU1LCAyNTUpOyIgZD0iTSA3IDIgSCA5IFYgMTMgQSAxIDEgMCAwIDEgOCAxNCBIIDggQSAxIDEgMCAwIDEgNyAxMyBWIDIgWiIgYng6c2hhcGU9InJlY3QgNyAyIDIgMTIgMCAwIDEgMSAxQDJlNDU4NGY4Ij48L3BhdGg+Cjwvc3ZnPg==") 16 0 0 / 16px 0 0 0 / 0px round;}
+      }
+      input[name="time"][type=range]::-ms-tooltip {
+        display:none;
+      }
+      input[name="time"][type=range]::-moz-range-track {
+        height:0;
+      }
+      input[name="time"][type=range]::-moz-range-thumb {
+        display:block;
+      }
+      .layers > .sequence-scale {
+        display: inline-flex;
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 1rem;
+        margin: 0;
+        margin-top: -1rem;
+        margin-bottom: calc(1em - 100%);
+        border: none;
+        background: #ccc;
+        align-items: flex-start;
+        overflow: hidden;
+        box-sizing: border-box;
+        z-index: 4;
+      }
+      .sequence-scale > span {
+        height: 1rem;
+        min-width: var(--scale-length);
+        max-width: var(--scale-length);
+        line-height: 100%;
+        background: linear-gradient(45deg, black, white);
+      }
+      .layer-tips > .sequence-scale-spacer {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 1rem;
+        margin-top: -1rem;
+        background: #666;
+      }
+      .layers > div.wrapper {
+        display: inline-block;
+        position: sticky;
+        top:0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin-bottom: -100%;
+        z-index: 3;
+      }
+      input.switch[type="checkbox"] {
+        display: inline-flex;
+        appearance: unset;
+        width: 3.5em;
+        height: 2em;
+        border-radius: 2em;
+        border: solid 1px #444444;
+        background-color: #ffffff;
+        align-items: center;
+        box-sizing: border-box;
+      }
+      input.switch[type="checkbox"][disabled] {
+        background-color: #aaaaaa;
+      }
+      input.switch[type="checkbox"]:checked {
+        background-color: #6666ff;
+      }
+      input.switch[type="checkbox"][disabled]:checked {
+        background-color: #666699;
+      }
+      input.switch[type="checkbox"]::after {
+        content: "";
+        display: inline-block;
+        position: relative;
+        height: 80%;
+        aspect-ratio: 1;
+        margin: calc(8% - 0.5px);
+        background-color: white;
+        background-origin: content-box;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #333333;
+        border-radius: 50%;
+        padding: 5%;
+        box-sizing: border-box;
+        left: 0;
+        background-size: contain;
+        transition: left 0.15s cubic-bezier(0.67, -0.01, 0.1, 1.5);
+      }
+      input.switch[type="checkbox"][disabled]::after {
+        background-color: #aaaaaa;
+      }
+      input.switch[type="checkbox"]:checked::after {
+        left: 42%;
+      }
+      .detail label, .detail span {
+        color: white;
+        white-space: nowrap;
+      }
+      .detail .first {
+        display: inline-flex;
+        flex-direction: row;
+        width: 100%;
+      }
+      .detail .first > div {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      .detail .first > div > div {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .detail .first > div > div > input, .detail .first > div > div > transitional-input, .detail .first > div > div > .inputs {
+        width: calc(100% - 6rem);
+      }
+      .detail .inputs {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        width: calc(100% - 6rem);
+      }
+      .detail .inputs input, .detail .inputs transitional-input {
+        width: 50%;
+      }
+      .detail .inputs .px, .details .inputs .percent {
+        padding-right: 0.35em;
+        border-right: solid 1px #ccc;
+        margin-right: 0.35em;
+        box-sizing: border-box;
+      }
+      .detail .inputs .px:last-child, .details .inputs .percent:last-child {
+        padding-right: 0;
+        border-right: 0;
+        margin-right: 0;
+      }
+      .detail input[type="checkbox"][name="aspect-lock"] {
+        appearance: none;
+        width: 2em;
+        height: 2em;
+        margin: 0;
+        background-color: #ffffff66;
+        -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+ICA8ZGVmcz48L2RlZnM+ICA8cGF0aCBkPSJNIDEuOTkzIDYgTCAxMSA2IEMgMTEgNS42ODcgMTEgNS4zNTEgMTEgNSBDIDExIDMuMzQzIDkuNjU3IDIgOCAyIEMgNi4zNDMgMiA1IDMuMzQzIDUgNSBMIDMgNSBDIDMgMi4yMzkgNS4yMzkgMCA4IDAgQyAxMC43NjEgMCAxMyAyLjIzOSAxMyA1IEMgMTMgNS4zNzkgMTMgNS43MSAxMyA2IEwgMTQuMDMxIDYgQyAxNS4xMzYgNiAxNi4wMzEgNi44OTUgMTYuMDMxIDggTCAxNi4wMzEgMTQgQyAxNi4wMzEgMTUuMTA1IDE1LjEzNiAxNiAxNC4wMzEgMTYgTCAxLjk5MyAxNiBDIDAuODg4IDE2IC0wLjAwNyAxNS4xMDUgLTAuMDA3IDE0IEwgLTAuMDA3IDggQyAtMC4wMDcgNi44OTUgMC44ODggNiAxLjk5MyA2IFogTSA4IDggQyA2Ljg5NSA4IDYgOC44OTUgNiAxMCBDIDYgMTAuNzgzIDYuNDUgMTEuNDYxIDcuMTA1IDExLjc4OSBMIDYgMTQgTCAxMCAxNCBMIDguODk1IDExLjc4OSBDIDkuNTUgMTEuNDYxIDEwIDEwLjc4MyAxMCAxMCBDIDEwIDguODk1IDkuMTA1IDggOCA4IFoiIHN0eWxlPSJmaWxsOiByZ2IoMjE2LCAyMTYsIDIxNik7Ij48L3BhdGg+PC9zdmc+");
+        -webkit-mask-size: contain;
+        -webkit-mask-position: center;
+        -webkit-mask-repeat: no-repeat;
+      }
+      .detail input[type="checkbox"][name="aspect-lock"]:checked {
+        background-color: #ddddff;
+        -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+ICA8ZGVmcz48L2RlZnM+ICA8cGF0aCBkPSJNIDMgNSBDIDMgMi4yMzkgNS4yMzkgMCA4IDAgQyAxMC43NjEgMCAxMyAyLjIzOSAxMyA1IEMgMTMgNS4zNzkgMTMgNS43MSAxMyA2IEwgMTQuMDMxIDYgQyAxNS4xMzYgNiAxNi4wMzEgNi44OTUgMTYuMDMxIDggTCAxNi4wMzEgMTQgQyAxNi4wMzEgMTUuMTA1IDE1LjEzNiAxNiAxNC4wMzEgMTYgTCAxLjk5MyAxNiBDIDAuODg4IDE2IC0wLjAwNyAxNS4xMDUgLTAuMDA3IDE0IEwgLTAuMDA3IDggQyAtMC4wMDcgNi44OTUgMC44ODggNiAxLjk5MyA2IEwgMyA2IEMgMyA1LjcxIDMgNS4zNzkgMyA1IFogTSAxMSA1IEMgMTEgMy4zNDMgOS42NTcgMiA4IDIgQyA2LjM0MyAyIDUgMy4zNDMgNSA1IEMgNSA1LjM1MSA1IDUuNjg3IDUgNiBMIDExIDYgQyAxMSA1LjY4NyAxMSA1LjM1MSAxMSA1IFogTSA4IDggQyA2Ljg5NSA4IDYgOC44OTUgNiAxMCBDIDYgMTAuNzgzIDYuNDUgMTEuNDYxIDcuMTA1IDExLjc4OSBMIDYgMTQgTCAxMCAxNCBMIDguODk1IDExLjc4OSBDIDkuNTUgMTEuNDYxIDEwIDEwLjc4MyAxMCAxMCBDIDEwIDguODk1IDkuMTA1IDggOCA4IFoiIHN0eWxlPSJmaWxsOiByZ2IoMjE2LCAyMTYsIDIxNik7Ij48L3BhdGg+PC9zdmc+");
+      }
+      .detail transitional-input {
+        display: inline-flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+      .detail transitional-input > input[type="checkbox"] {
+        appearance: none;
+        width: 1.5rem;
+        height: 1.5rem;
+        -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPHBhdGggZD0iTSAwLjA0MTAwMDAwMTEzMjQ4ODI1IDAuMDMyOTk5OTk5ODIxMTg2MDY2IEwgMC4wMTMwMDAwMDAyNjgyMjA5MDEgMTUuOTYwMDAwMDM4MTQ2OTczIEwgMTYgOCBaIiBzdHlsZT0iIj48L3BhdGg+DQo8L3N2Zz4=");
+        -webkit-mask-size: 80%;
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        box-sizing: border-box;
+        margin: 0;
+        background-color: #666666;
+      }
+      .detail transitional-input > input[type="checkbox"]:checked {
+        background-color: #dddddd;
+      }
+      .detail transitional-input > input[type="checkbox"] + input {  
+        display: none;
+      }
+      .detail transitional-input > input[type="checkbox"]:checked + input {
+        display: inline-block;
+      }
+      .detail transitional-input:has(input[type="checkbox"]) > input:not([type="checkbox"]) {
+        width: calc(100% - 1.5rem);
+      }
+      .detail transitional-input:has(input[type="checkbox"]:checked) > input:not([type="checkbox"]) {
+        width: calc(50% - 0.75rem);
+      }
+      pop-up#loading > .body {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .cover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(2px);
+        z-index: 100;
+        background: #00000033;
+      }
+    </style>
+    <style id="dynamic">
+      .layers, .layers * {
+        --unit-length: 1px;
+      }
+      .preview, .preview * {
+        --unit-px: 1px;
+        --preview-width: 1920;
+        --preview-height: 1080;
+      }
+      .sequence-scale, .sequence-scale > span {
+      }
+    </style>
+    <script>
+      class HTMLLayerElement extends HTMLElement {
+        #solo;
+        #mute;
+        #state;
+        #volume;
+        #tips;
+        #constructed = false;
+        constructor() {
+          super();
+          if (this.#constructed) {
+            return;
+          }
+          this.#constructed = true;
+          this.#state = 0;
+          this.#tips = document.createElement("div");
+          this.#tips.setAttribute("class", "tips");
+          let buttons = document.createElement("div");
+          buttons.setAttribute("class", "buttons");
+          this.#solo = document.createElement("input");
+          this.#mute = document.createElement("input");
+          this.#volume = document.createElement("input");
+          this.#solo.setAttribute("type", "checkbox");
+          this.#mute.setAttribute("type", "checkbox");
+          this.#solo.setAttribute("class", "solo");
+          this.#mute.setAttribute("class", "mute");
+          this.#volume.setAttribute("type", "range");
+          this.#volume.setAttribute("min", "0");
+          this.#volume.setAttribute("max", "100");
+          this.#volume.setAttribute("class", "volume");
+          buttons.appendChild(this.#solo);
+          buttons.appendChild(this.#mute);
+          this.#tips.appendChild(buttons);
+          this.#tips.appendChild(this.#volume);
+          setTimeout(()=>{
+          }, 0);
+        }
+        connectedCallback() {
+          document.getElementsByClassName("layer-tips")[0].appendChild(this.#tips);
+        }
+        disconnectedCallback() {
+          this.#tips.remove();
+        }
+      }
+      class HTMLSourceObjectElement extends HTMLElement {
+        TYPES = {VIDEO:"動画", AUDIO:"音声", IMAGE:"画像", TEXT:"テキスト", SHAPE:"図形", EFFECT:"効果"}
+        #label;
+        #radio;
+        #constructed = false;
+        constructor() {
+          super();
+          let name = "untitled";
+          this.__srcObj = undefined;
+          this.#label = document.createElement("label");
+          this.#label.setAttribute("class", "name");
+          this.#radio = document.createElement("input");
+          this.#radio.setAttribute("name", "src-focused");
+          this.#radio.setAttribute("type", "radio");
+          let back = document.createElement("div");
+          back.setAttribute("class", "focused");
+          this.#constructed = true;
+          setTimeout(()=>{
+            this.setAttribute("tabindex", "0");
+            this.appendChild(this.#label);
+            this.appendChild(this.#radio);
+            this.appendChild(back);
+            if (this.hasAttribute("type")) {
+              ;//let type = this.getAttribute("type");
+              ;//this.#label.innerText = name + "("+this.TYPES[type.toUpperCase()]+")";
+            }
+          }, 0); 
+        }
+
+        connectedCallback() {
+          this.#label.innerText = this.getAttribute("name") + "("+this.TYPES[this.getAttribute("type").toUpperCase()]+")";
+          this.addEventListener("click", this.showDetail);
+        }
+
+        disconnectedCallback() {
+          this.removeEventListener("click", this.showDetail);
+        }
+
+        get srcObj() {
+          return this.__srcObj;
+        }
+
+        set srcObj(value) {
+          this.#radio.setAttribute("value", value.id);
+          this.__srcObj = value;
+        }
+
+        showDetail(e) {
+          if (e.target == this.#radio) {
+            return;
+          }
+          this.#radio.click();
+          if (this.__srcObj) {
+            let el = this.__srcObj.detailElement;
+            document.getElementsByClassName("detail")[0].replaceChildren(el);
+          }
+        }
+
+        static get observedAttributes() {
+          return ["name", "type"];
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+          if (!this.#constructed) {
+            setTimeout(()=>{this.attributeChangedCallback(name, oldValue, newValue);}, 100);
+            console.log(123);
+            return;
+          }
+          if (name == "name" || name == "type") {
+            this.#label.innertext = newValue + "("+this.TYPES[this.getAttribute("type").toUpperCase()]+")";
+          }
+        }
+      }
+      class HTMLSeekBarElement extends HTMLElement {
+        constructor() {
+          super();
+          this.__start = 0;
+          this.__end = 0;
+          this.__spans = [];
+          this.startLabel = document.createElement("label");
+          this.endLabel = document.createElement("label");
+          this.__bar = document.createElement("div");
+          setTimeout(()=>{
+            this.append(this.startLabel, this.__bar, this.endLabel);
+          }, 0)
+        }
+        get ranges() {
+          return this.__bar.children;
+        }
+      }
+      class HTMLTransitionalInputElement extends HTMLElement {
+        constructor() {
+          super();
+          this.begin = document.createElement("input");
+          this.end = document.createElement("input");
+          this.switch = document.createElement("input");
+          this.switch.setAttribute("type", "checkbox");
+          this.switch.addEventListener("change", (e)=>{
+            this.enabled = e.value;
+          });
+          this.__enabled = false;
+          Object.defineProperty(this, "enabled", {
+            get() {
+              return this.__enabled;
+            },
+            set(value) {
+              this.__enabled = value == true;
+              this.switch.value = this.__enabled;
+            }
+          });
+          setTimeout(()=>{
+            this.append(this.begin, this.switch, this.end)
+          }, 0);
+        }
+        static get observedAttributes() {
+          return ["type","disabled"];
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+          if (name == "type") {
+            if (newValue) {
+              this.begin.setAttribute("type", newValue);
+              this.end.setAttribute("type", newValue);
+            } else {
+              this.begin.removeAttribute("type");
+              this.end.removeAttribute("type");
+            }
+          } else if (name == "disabled") {
+            if (newValue) {
+              this.begin.setAttribute("disabled", "");
+              this.end.setAttribute("disabled", "");
+            } else {
+              this.begin.removeAttribute("disabled");
+              this.end.removeAttribute("disabled");
+            }
+          }
+        }
+      }
+      class HTMLPopupElement extends HTMLElement {
+        #header
+        #body
+        #ready
+        #type
+        #childcache
+        #dragstart
+        #cover
+        constructor(type) {
+          super();
+          this.#ready = false;
+          this.#body = document.createElement("div");
+          this.#cover = document.createElement("div");
+          this.#cover.setAttribute("class", "cover");
+          this.#type = type?type.toUpperCase():"NORMAL";
+          setTimeout(()=>{
+            var children = [...this.children, ...this.#body.children];
+            this.#type = this.getAttribute("type") || this.#type;
+            this.#type = this.#type?this.#type.toUpperCase():"NORMAL";
+            for (let i of children) {
+              i.remove();
+            }
+            console.log(children);
+            if (this.#type == "NORMAL") {
+              this.#header = document.createElement("div")
+              this.#header.setAttribute("class", "header");
+              var buttons = {close: document.createElement("button"), minimize: document.createElement("button")};
+              for (let i of Object.values(buttons)) {
+                i.appendChild(document.createElement("span"));
+                i.children[0].setAttribute("class", "image");
+              }
+              buttons.close.setAttribute("class", "close");
+              buttons.minimize.setAttribute("class", "minimize");
+              this.#header.append(buttons.minimize, buttons.close);
+              buttons.minimize.addEventListener("click", ()=>{
+                if (this.hasAttribute("minimized")) {
+                  this.removeAttribute("minimized");
+                } else {
+                  this.setAttribute("minimized", "");
+                }
+              });
+              buttons.close.addEventListener("click", ()=>{
+                this.removeAttribute("active");
+              });
+              this.appendChild(this.#header);
+            } else if (this.#type == "MORDAL") {
+              this.style.top = "50%";
+              this.style.left = "50%";
+              this.style.translate = "-50% -50%";
+            }
+            this.#body.remove();
+            this.#body = document.createElement("div")
+            this.#body.setAttribute("class", "body");
+            this.#body.append(...children);
+            this.appendChild(this.#body);
+            this.#ready = true;
+            console.log(this);
+            this.addEventListener("mousedown", ()=>{this.raiseFront();});
+            this.#dragstart = (e)=>{
+              if (e.target != this.#header) { return; }
+              e.preventDefault();
+              if (e.type == "touchstart") { e = e.touches[0]; }
+              var rect = this.getBoundingClientRect();
+              var x = rect.x;
+              var y = rect.y;
+              var aborter = new AbortController();
+              var move = (ev)=>{
+                if (ev.type == "touchmove") { ev = ev.touches[0]; }
+                console.log([x + ev.clientX - e.clientX, y + ev.clientY - e.clientY]);
+                this.style.left = x + ev.clientX - e.clientX + "px";
+                this.style.top = y + ev.clientY - e.clientY + "px";
+              };
+              var stop = (ev)=>{
+                aborter.abort();
+              };
+              window.addEventListener("mousemove", move, {signal:aborter.signal});
+              window.addEventListener("mouseup", stop, {signal: aborter.signal});
+              window.addEventListener("touchmove", move, {signal:aborter.signal});
+              window.addEventListener("touchend", stop, {signal: aborter.signal});
+            };
+            this.dispatchEvent(new Event("ready"));
+          }, 0);
+        }
+        get body() {
+          return this.#body;
+        }
+        appendChild(node) {
+          if (node == this.#header || node == this.#body) {
+            super.appendChild(node);
+          } else {
+            this.#body.append(node);
+          }
+        }
+        append(...nodes) {
+          this.#body.append(...nodes);
+        }
+        activate() {
+          this.setAttribute("active", "");
+          if (this.hasAttribute("minimized")) {
+            this.removeAttribute("minimized");
+          }
+        }
+        close() {
+          try {
+            this.removeAttribute("active")
+          } catch {
+            ;
+          }
+          if (this.hasAttribute("minimized")) {
+            this.removeAttribute("minimized");
+          }
+        }
+        static get observedAttributes() {
+          return ["active"];
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+          if (name=="active" && oldValue == null) {
+            var rect = this.getBoundingClientRect();
+            var rect2 = document.body.getBoundingClientRect();
+            if (this.#type == "NORMAL") {
+              this.style.top = (rect2.height - rect.height) / 2 + "px";
+              this.style.left = (rect2.width - rect.width) / 2 + "px";
+              this.#header.addEventListener("mousedown", this.#dragstart);
+              this.#header.addEventListener("touchstart", this.#dragstart);
+            } else if (this.#type == "MORDAL") {
+              document.body.appendChild(this.#cover);
+            }
+            this.raiseFront();
+          } else if (name == "active" && newValue == null) {
+            if (this.#type == "NORMAL") {
+              this.#header.removeEventListener("mousedown", this.#dragstart);
+              this.#header.removeEventListener("touchstart", this.#dragstart);
+            } else if (this.#type == "MORDAL") {
+              this.#cover.remove();
+            }
+          }
+        }
+        raiseFront() {
+          [...this.parentElement.children].filter((i)=>i!=this).reverse().forEach((i)=>{
+            this.parentElement.insertAdjacentElement("afterbegin", i);
+          });
+        }
+      }
+      class HTMLColorPickerElement extends HTMLElement {
+        #input;
+        constructor() {
+          super();
+          setTimeout(()=>{
+            this.#input = document.createElement("input");
+            this.appendChild(this.#input);
+            this.#input.type = "color";
+            this.style.background = this.#input.value;
+            this.#input.addEventListener("input", (e)=>{
+              this.style.background = this.#input.value;
+            });
+            this.addEventListener("click", (e)=>{this.#input.click();});
+          }, 0);
+        }
+        get value() {
+          return this.#input.value;
+        }
+        set value(value) {
+          this.#input.value = value;
+        }
+      }
+      customElements.define("li-layer", HTMLLayerElement);
+      customElements.define("src-obj", HTMLSourceObjectElement);
+      customElements.define("seek-bar", HTMLSeekBarElement);
+      customElements.define("transitional-input", HTMLTransitionalInputElement);
+      customElements.define("pop-up", HTMLPopupElement);
+      customElements.define("color-picker", HTMLColorPickerElement);
+    </script>
+  </head>
+  <body>
+    <nav>
+      <div class="menu">
+        <div class="item">
+          <div class="label">
+            File
+          </div>
+          <div class="drop">
+            <div class="child">
+              <button name="newpro" type="button">
+                <span class="title">New project</span>
+                <span class="sub">Ctrl+Alt+N</span>
+              </button>
+            </div>
+            <div class="child">
+              <button name="openpro" type="button">
+                <span class="title">Open project</span>
+                <span class="sub">Ctrl+O</span>
+              </button>
+            </div>
+            <div class="child">
+              <button name="savepro" type="button">
+                <span class="title">Save project</span>
+                <span class="sub">Ctrl+S</span>
+              </button>
+            </div>
+            <div class="child">
+              <button name="import" type="button">
+                <span class="title">Import</span>
+                <span class="sub">Ctrl+I</span>
+              </button>
+            </div>
+            <div class="child">
+              <button name="encode" type="popup" disabled>Encode</button>
+            </div>
+            <div class="child">
+              <button name="about" type="button" disabled>About</button>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="label">Edit</div>
+          <div class="drop">
+            <div class="child">
+              <button name="create-text" type="button">Create text</button>
+            </div>
+            <div class="child">
+              <button name="search" type="button" disabled>Search</button>
+            </div>
+            <div class="child">
+              <button name="replace" type="button" disabled>Replace</button>
+            </div>
+            <div class="child">
+              <button name="select-all" type="button" disabled>Select ALL</button>
+            </div>
+            <div class="child"></div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="label">Options</div>
+          <div class="drop">
+            <div class="child">
+              <button name="project-settings" type="popup">Project Settings</button>
+            </div>
+            <div class="child">
+              <button name="settings" type="button">Settings</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="main">
+      <div class="area above">
+        <div class="preview-box">
+          <div class="preview">
+          </div>
+        </div>
+        <div class="detail">
+        </div>
+      </div>
+      <div class="tooltip">
+        <button name="play-preview">Play</button>
+        <button name="stop-preview">Stop</button>
+        <div hidden>
+        <input name="mode" value="play" type="radio">
+        <input name="mode" value="forward" type="radio">
+        <input name="mode" value="backward" type="radio">
+        <button>Select-before</button>
+        <button>Select-after</button>
+        <button>copy</button>
+        <button>paste</button>
+        <button>cut</button>
+        <button>delete</button>
+        </div>
+      </div>
+      <div class="area below">
+        <div class="timeline">
+          <ul class="layer-tips">
+            <div class="sequence-scale-spacer"></div>
+          </ul>
+          <ul class="layers">
+            <input name="time" type="range">
+            <span class="sequence-scale"></span>
+            <div class="wrapper"></div>
+            <li-layer index="0">
+            </li-layer>
+          </ul>
+        </div>
+      </div>
+      <div class="side-panel">
+        <input type="checkbox" class="nob">
+      </div>
+    </div>
+    <pop-up id="loading" type="mordal">
+      <div>
+        <label>読み込み中...</label>
+      </div>
+    </pop-up>
+    <pop-up id="encode">
+      <style>
+        pop-up#encode {
+        }
+      </style>
+      <form name="encode-options">
+        <div>
+          <label>File name:</label>
+          <input type="text" value="output.mp4">
+        </div>
+        <div>
+          <label>Format:</label>
+          <select name="format" required disabled>
+            <option value="mp4" selected>MP4</option>
+          </select>
+        </div>
+        <section>
+          <h3>Video</h3>
+          <input name="venabled" type="checkbox" class="switch" disabled checked>
+          <div>
+            <label>Codec:</label>
+            <select name="vcodec" required disabled>
+              <option selected value="avc1">H.264</option>
+            </select>
+          </div>
+          <div>
+            <label>Frame rate:</label>
+            <input name="vfps" type="number">
+          </div>
+        </section>
+        <section>
+          <h3>Audio</h3>
+          <input name="aenabled" type="checkbox" class="switch" disabled checked>
+          <div>
+            <label>Codec:</label>
+            <select name="acodec" required disabled>
+              <option value="aac" selected>AAC - Advanced Audio Codec</option>
+            </select>
+          </div>
+          <div>
+            <label>Frame rate:</label>
+            <input name="afps" type="number">
+          </div>
+          <div>
+            <label>Sample rate:</label>
+            <input "samplerate"type="number">
+          </div>
+          <div>
+            <label>Stereo audio:</label>
+            <input name="stereo" type="checkbox" class="switch" disabled checked>
+          </div>
+        </section>
+        <button>cancel</button>
+        <input type="submit" label="start">
+      </form>
+    </pop-up>
+    <pop-up id="project-settings">
+    </pop-up>
+    <script>
+      /* 表示幅-> 8こ分
+         外側に1こずつ-> 計10こにする
+      var sequence = document.getElementsByClassName("sequence")[0]; */
+      var viewRange = [0, 1000]; // ms, start <= ~ < end
+      var selectRange = [0, 0];
+      var wholeRange = [0, 1000];
+      handling = false;
+      function drawSequence() {
+        scrollLeft = document.getElementsByClassName("timeline")[0].scrollLeft;
+        
+        if (sequence.children.length < 10) {
+          for (let i = sequence.children.length; i < 10; i++) {
+            sequence.appendChild(((el)=>{el.innerHTML="<label></label>"; el.children[0].innerText = (wholeRange[1]-wholeRange[0])/((viewRange[1]-viewRange[0]) / 8);return el;})(document.createElement("span")));
+          }
+      }
+    </script>
+    <script>
+      for (let bt of document.getElementsByTagName("button")) {
+        if (bt.getAttribute("type") == "popup") {
+          bt.addEventListener("click", ()=>{
+            document.getElementById(bt.getAttribute("name")).setAttribute("active", "");
+          });
+        }
+      }
+    </script>
+    <script>
+      const VERSION = "0.0.1";
+
+      const AsyncFunction = Object.getPrototypeOf(async ()=>{}).constructor;
+
+      function waitUntil(obj, event, options={callback:(e)=>e, timeout:3000, signal:undefined}) {
+        return new Promise((resolve, reject)=>{
+          let id;
+          let listener = obj.addEventListener(event, async (e)=>{
+            try {
+              clearTimeout(id);
+            } catch {}
+            let result;
+            if (Object.getPrototypeOf(async ()=>{}).isPrototypeOf(options.callback)) {
+              result = await options.callback(e);
+            } else if (options.callback != undefined){
+              result = options.callback(e);
+            } else {
+              result = e;
+            }
+            resolve(result);
+          }, {once: true, signal:options.signal});
+          if (options.timeout != undefined) {
+            id = setTimeout(()=>{
+              try {
+                obj.removeEventListener(listener);
+              } catch {}
+              reject();
+            }, options.timeout);
+          }
+          if (options.signal != undefined) {
+            options.signal.addEventListener("abort", (e)=>{
+              try {
+                clearTimeout(id);
+              } catch {}
+              reject();
+            });
+          }
+        });
+      }
+ 
+      class TimeDelta extends Object {
+        constructor(seconds) {
+          super();
+          this.millisecond = Math.round((seconds - Math.floor(seconds)) * 1000);
+          seconds = Math.floor(seconds);
+          this.second = seconds % 60;
+          seconds = Math.round((seconds - this.second) / 60);
+          this.minute = seconds % 60;
+          seconds = Math.round((seconds - this.minute) / 60);
+          this.hour = seconds;
+        }
+      }
+      var SOURCE_TYPES = {
+        UNKNOWN: 0,
+        VIDEO: 1,
+        AUDIO: 2,
+        IMAGE: 3,
+        TEXT: 4,
+        SHAPE: 5,
+        EFFECT: 6
+      }
+      var SOURCE_TYPE_TEXTS = {
+        0: "unknown",
+        1: "video",
+        2: "audio",
+        3: "image",
+        4: "text",
+        5: "shape",
+        6: "effect"
+      }
+
+      var srcIds = [];
+      var materialIds = [];
+
+      async function convertSVGToVideoFrame(svg, options) {
+        let {ms=0, width, height} = options;
+        if (SVGSVGElement.prototype.isPrototypeOf(svg)) {
+          svg = svg.cloneNode(true);
+        } else if (svg.toString != undefined) {
+          let text = svg.toString();
+          svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          let m = text.match(/<svg *(?<options>(?:(?:[a-zA-Z0-9:]+)(?:=(?:(?:'(?:[^']|\\')*')|(?:"(?:[^"]|\\")*")))? *)*) *>(?<innerHTML>(?:.|\s)*)<\/svg>/);
+          if (m == undefined) {
+            throw "given svg is not a svg.";
+          }
+          let options = m.groups.options.matchAll(/(?<key>[a-zA-Z0-9:]+)(?:=(?<quote>['"])(?<value>(?:(?!\k<quote>).|\\\k<quote>)*)\k<quote>)?/g);
+          for (let option of options) {
+            if (option.groups.key == "width" && width == undefined) {
+              width = parseFloat(option.groups.value);
+            }
+            if (option.groups.key == "height" && height == undefined) {
+              height = parseFloat(option.groups.value);
+            }
+            svg.setAttribute(option.groups.key, option.groups.value || "");
+          }
+          svg.innerHTML = m.groups.innerHTML;
+        } else {
+          throw "svg should be <svg> or svg text.";
+        }
+        svg.pauseAnimations();
+        svg.setCurrentTime(ms/1000);
+        svg.querySelectorAll("*").forEach((el)=>{el.transiton="";});
+        svg.querySelectorAll("animate, animateTransform").forEach((el)=>{
+          let key = el.getAttribute("attributeName");
+          let value = el.parentNode.computedStyleMap().get(key).toString();
+          el.parentNode.style[key.replaceAll(/(?<=\w)-(?<figure>\W)/g, "$<figure>")] = value;
+          el.remove();
+        });
+        let img = document.createElement("img");
+        img.src = "data:image/svg+xml;charset=utf-8;base64,"+btoa(svg.outerHTML.replaceAll(/[^\x00-\x7f]+/g, (m)=>unescape(encodeURIComponent(m[0]))));
+        img.style.width = width + "px";
+        img.style.height = height + "px";
+        img.setAttribute("width", Math.round(width));
+        img.setAttribute("height", Math.round(height));
+        await img.decode();
+        let bitmap = await createImageBitmap(img, 0, 0, width, height, {resizeWidth:width, resizeHeight:height});
+        let videoFrame = new VideoFrame(bitmap, {timestamp:ms});
+        return videoFrame;
+      }
+
+      class Prompts {
+        static show(element, buttons, iconUrl) {
+          element = this.__checkText(element);
+          let frame = document.createElement("div");
+          let body = document.createElement("div");
+          if (iconUrl) {
+            let icon = document.createElement("img");
+            icon.style.margin = "0.5rem";
+            icon.src = iconUrl;
+            body.append(icon);
+            body.style.display = "inline-flex";
+          }
+          body.append(element);
+          let btnarea = document.createElement("div");
+          btnarea.setAttribute("class", "buttons");
+          btnarea.append(...buttons);
+          frame.append(body, btnarea);
+          let popup = new HTMLPopupElement("mordal");
+          popup.setAttribute("type", "mordal");
+          popup.appendChild(frame);
+          document.body.appendChild(popup);
+          return popup;
+        }
+        static async showInfo(element) {
+          let buttons = [
+            this.__createButton("OK"),
+          ];
+          let popup = this.show(element, buttons, "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPGNpcmNsZSBzdHlsZT0iZmlsbDogcmdiKDEwMiwgMTAyLCAyNTUpOyIgY3g9IjMyIiBjeT0iMzIiIHI9IjMyIj48L2NpcmNsZT4NCiAgPHBhdGggc3R5bGU9ImZpbGw6IG5vbmU7IHN0cm9rZS13aWR0aDogOHB4OyBzdHJva2U6IHJnYigyNTUsIDI1NSwgMjU1KTsgc3Ryb2tlLWxpbmVjYXA6IHJvdW5kOyBzdHJva2UtbGluZWpvaW46IHJvdW5kOyIgZD0iTSAyNCAzMiBMIDMyIDMyIEwgMzIgNTYgQyAzNiA1NiA0MCA1MiA0MCA1MiI+PC9wYXRoPg0KICA8Y2lyY2xlIHN0eWxlPSJmaWxsOiByZ2IoMjU1LCAyNTUsIDI1NSk7IiBjeD0iMzIiIGN5PSIxNiIgcj0iOCI+PC9jaXJjbGU+DQo8L3N2Zz4=");
+          
+          popup.activate();
+          await waitUntil(buttons[0], "click", (e)=>{});
+          popup.close();
+          popup.remove();
+          return;
+        }
+        static async showWarn(element) {
+          let buttons = [
+            this.__createButton("OK"),
+          ];
+          let popup = this.show(element, buttons);
+          popup.activate();
+          await waitUntil(buttons[0], "click", (e)=>{});
+          popup.close();
+          popup.remove();
+          return;
+        }
+        static async showError(element) {
+          let buttons = [
+            this.__createButton("OK"),
+          ];
+          let popup = this.show(element, buttons, "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPGNpcmNsZSBzdHlsZT0iZmlsbDogcmdiKDI1NSwgNTEsIDUxKTsiIGN4PSIzMiIgY3k9IjMyIiByPSIzMiI+PC9jaXJjbGU+DQogIDxsaW5lIHN0eWxlPSJmaWxsOiByZ2IoMjE2LCAyMTYsIDIxNik7IHN0cm9rZTogcmdiKDI1NSwgMjU1LCAyNTUpOyBzdHJva2Utd2lkdGg6IDhweDsgc3Ryb2tlLWxpbmVjYXA6IHJvdW5kOyIgeDE9IjE2IiB5MT0iMTYiIHgyPSI0OCIgeTI9IjQ4Ij48L2xpbmU+DQogIDxsaW5lIHN0eWxlPSJmaWxsOiByZ2IoMjE2LCAyMTYsIDIxNik7IHN0cm9rZTogcmdiKDI1NSwgMjU1LCAyNTUpOyBzdHJva2Utd2lkdGg6IDhweDsgc3Ryb2tlLWxpbmVjYXA6IHJvdW5kOyIgeDE9IjQ4IiB5MT0iMTYiIHgyPSIxNiIgeTI9IjQ4Ij48L2xpbmU+DQo8L3N2Zz4=");
+          popup.activate();
+          await waitUntil(buttons[0], "click", (e)=>{});
+          popup.close();
+          popup.remove();
+          return;
+        }
+        static async askOk(element) {
+          let buttons = [
+            this.__createButton("Yes"),
+            this.__createButton("No"),
+          ];
+          let result = false;
+          let popup = this.show(element, buttons, "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPGNpcmNsZSBzdHlsZT0iZmlsbDogcmdiKDEwMiwgMjU1LCA1MSk7IiBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiPjwvY2lyY2xlPg0KICA8cGF0aCBzdHlsZT0iZmlsbDogbm9uZTsgc3Ryb2tlOiByZ2IoMjU1LCAyNTUsIDI1NSk7IHN0cm9rZS1saW5lY2FwOiByb3VuZDsgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsgc3Ryb2tlLXdpZHRoOiA4cHg7IiBkPSJNIDE2IDMyIEwgMTYgMjAgQyAxNiA4IDQ4IDggNDggMjAgTCA0OCAzMiBDIDQ4IDQwIDMyIDMyIDMyIDQ0Ij48L3BhdGg+DQogIDxjaXJjbGUgc3R5bGU9ImZpbGw6IHJnYigyNTUsIDI1NSwgMjU1KTsiIGN4PSIzMiIgY3k9IjU2IiByPSI0Ij48L2NpcmNsZT4NCjwvc3ZnPg==");
+          popup.activate();
+          let aborter = new AbortController();
+          let promises = [
+            waitUntil(buttons[0], "click", {callback:(e)=>{return true;}, signal:aborter.signal}),
+            waitUntil(buttons[1], "click", {callback:(e)=>{return false;}, signal:aborter.signal}),
+          ];
+          result = await Promise.any(promises);
+          popup.close();
+          popup.remove();
+          return result;
+        }
+        static async askYN(element) {
+          let buttons = [
+            this.__createButton("Yes"),
+            this.__createButton("No"),
+          ];
+          let result = false;
+          let popup = this.show(element, buttons, "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogIDxkZWZzPjwvZGVmcz4NCiAgPGNpcmNsZSBzdHlsZT0iZmlsbDogcmdiKDEwMiwgMjU1LCA1MSk7IiBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiPjwvY2lyY2xlPg0KICA8cGF0aCBzdHlsZT0iZmlsbDogbm9uZTsgc3Ryb2tlOiByZ2IoMjU1LCAyNTUsIDI1NSk7IHN0cm9rZS1saW5lY2FwOiByb3VuZDsgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsgc3Ryb2tlLXdpZHRoOiA4cHg7IiBkPSJNIDE2IDMyIEwgMTYgMjAgQyAxNiA4IDQ4IDggNDggMjAgTCA0OCAzMiBDIDQ4IDQwIDMyIDMyIDMyIDQ0Ij48L3BhdGg+DQogIDxjaXJjbGUgc3R5bGU9ImZpbGw6IHJnYigyNTUsIDI1NSwgMjU1KTsiIGN4PSIzMiIgY3k9IjU2IiByPSI0Ij48L2NpcmNsZT4NCjwvc3ZnPg==");
+          popup.activate();
+          let aborter = new AbortController();
+          let promises = [
+            waitUntil(buttons[0], "click", {callback:(e)=>{return true;}, signal:aborter.signal}),
+            waitUntil(buttons[1], "click", {callback:(e)=>{return false;}, signal:aborter.signal}),
+          ];
+          result = await Promise.any(promises);
+          popup.close();
+          popup.remove();
+          return result;
+        }
+        static __checkText(element) {
+          if (!Node.prototype.isPrototypeOf(element)) {
+            let text = element.toString();
+            element = document.createElement("p");
+            element.innerText = text;
+            element.setAttribute("style", "white-space:pre-line;");
+          }
+          return element;
+        }
+        static __createButton(label) {
+          let btn = document.createElement("button");
+          btn.innerText = label;
+          return btn;
+        }
+      }
+
+      class SourceClassTree {
+        #classes;
+        constructor() {
+          this.#classes = [];
+        }
+        get classes() {
+          return this.#classes
+        }
+        register(cls, callback=()=>false, type=SOURCE_TYPES.UNKNOWN) {
+          if (!SourceBase.isPrototypeOf(cls)) {
+            throw "cls is not a source class";
+          } else if (!Function.prototype.isPrototypeOf(callback) && !AsyncFunction.prototype.isPrototypeOf(callback)) {
+            throw "callback is not a function nor an async function";
+          }
+          let index = this.#classes.findIndex((i)=>i.cls==cls);
+          if (index < 0) {
+            this.#classes.splice(0, 0, {cls:cls, callback:callback, type:type});
+          } else {
+            this.#classes.at(index).callback = callback;
+          }
+        }
+        async getSourceClass(file) {
+          if (!File.prototype.isPrototypeOf(file)) {
+            throw "file is not a file";
+          }
+          for (let i of this.#classes) {
+            let check = i.callback;
+            let result;
+            try {
+              let result = check(file);
+              if (Promise.prototype.isPrototypeOf(result)) {
+                result = await result;
+              }
+            } catch(e) {
+              console.warn("cls callback threw an error, ignored:", e);
+            }
+            if (result) {
+              return i.cls;
+            }
+          }
+        }
+        getSourceClassFromType(type) {
+          for (let i of this.#classes) {
+            if (i.type == type) {
+              return i.cls;
+            }
+          }
+        }
+      }
+
+      class SourceOption extends EventTarget {
+        constructor(option, srcobj) {
+          super();
+          this.__span = [];
+          this.__srcobj = srcobj;
+          this.__option = option; //["__"+i[0]] = i[1];
+          this.__keys = Object.keys(option);
+          for (let key of this.__keys) {
+            if (OptionValue.prototype.isPrototypeOf(this.__option[key])) {
+              this.__option[key].onchange = ()=>{
+                this[key] = this[key];
+              };
+            }
+            Object.defineProperty(this, key, {
+              get: () => {
+                return this.__option[key];
+              },
+              set: (value) => {
+                let ev = new Event("change");
+                let ev2 = new Event("change-"+key);
+                ev.key = key;
+                ev.value = value;
+                ev.oldValue = this.__option[key];
+                ev2.value = value;
+                ev2.oldValue = this.__option[key];
+                this.__option[key] = value;
+                this.dispatchEvent(ev);
+                this.dispatchEvent(ev2);
+              }
+            });
+          }
+          this.addEventListener("change-frames", (e)=>{
+            this.length = this.frames[1] - this.frames[0];
+            this.__srcobj.style.left = "calc(var(--unit-length) * "+this.frames[0]+" / 1000)";
+            this.__srcobj.style.width = "calc(var(--unit-length) * "+this.length+" / 1000)";
+          });
+        }
+        redraw() {
+          for (let key of this.__keys) {
+            this[key] = this[key];
+          }
+        }
+        setTime(value) {
+          for (let key of this.__keys) {
+            this.__option[key].time = value;
+          }
+          this.redraw();
+        }
+        addKey(key, value) {
+          if (this.__option.hasOwnProperty(key)) {
+            this.__option[key] = value;
+            return;
+          }
+          this.__option[key] = value;
+          if (OptionValue.prototype.isPrototypeOf(value)) {
+            value.onchange = ()=>{
+              this[key] = this[key];
+            };
+          }
+          Object.defineProperty(this, key, {
+            get: () => {
+              return this.__option[key];
+            },
+            set: (value) => {
+              let ev = new Event("change");
+              let ev2 = new Event("change-"+key);
+              ev.key = key;
+              ev.value = value;
+              ev.oldValue = this.__option[key];
+              ev2.value = value;
+              ev2.oldValue = this.__option[key];
+              this.__option[key] = value;
+              this.dispatchEvent(ev);
+              this.dispatchEvent(ev2);
+            }
+          });
+        }
+      }
+
+      class OptionValue extends Object {
+        static LINEAR = 0;
+        constructor(option) {
+          super();
+          if (!Object.prototype.isPrototypeOf(option)) {
+            option = {begin: option, end: option};
+          }
+          let {begin=undefined, end=undefined, type=this.constructor.LINEAR} = option;
+          this.__begin = begin;
+          this.__end = end;
+          this.__type = type;
+          this.__time = 0;
+          this.__onchange = ()=>{};
+          Object.defineProperties(this, {
+            begin: {
+              get() {
+                return this.__begin;
+              },
+              set(value) {
+                this.__begin = value;
+                this.onchange();
+              }
+            },
+            end: {
+              get() {
+                return this.__end;
+              },
+              set(value) {
+                this.__end = value;
+                this.onchange();
+              }
+            },
+            type: {
+              get() {
+                return this.__type;
+              },
+              set(value) {
+                this.__type = value;
+                this.onchange();
+              }
+            },
+            curValue: {
+              get() {
+                if (true || this.__type == constructor.LINEAR) {
+                  return this.__begin * (1 - this.__time) + this.__end * this.__time;
+                }
+              },
+              set() {}
+            },
+            time: {
+              get() {
+                return this.__time;
+              },
+              set(value) {
+                this.__time = value;
+                this.onchange();
+              }
+            },
+            onchange: {
+              get() {
+                return this.__onchange;
+              },
+              set(value) {
+                console.log(value);
+                this.__onchange = value;
+              }
+            }
+          });
+        }
+      }
+
+      class Material extends Object {
+        constructor(fileHandle, path) {
+          super();
+          this.fileHandle = fileHandle;
+          this.path = path;
+          this.materialId = undefined;
+          while (this.materialId == undefined || materialIds.includes(this.materialId) || [Infinity, NaN].includes(Math.abs(this.materialId))) {
+            this.materialId = Math.round(Math.random() * (1024 * Math.ceil(Math.max(1, ...srcIds) / 1024))) - 1;
+          }
+        }
+      }
+
+      class SourceBase extends Object {
+        static check(file) {
+          return false;
+        }
+        constructor(file, path, format, type=SOURCE_TYPES.UNKNOWN, options={}) {
+          options = options
+          super();
+          this.id = undefined;
+          while (this.id == undefined || srcIds.includes(this.id) || [Infinity, NaN].includes(Math.abs(this.id))) {
+            this.id = Math.round(Math.random() * (1024 * Math.ceil(Math.max(1, ...srcIds) / 1024))) - 1;
+          }
+          srcIds.push(this.id);
+          this.file = file;
+          this.path = path;
+          this.format = format;
+          this.__type = type;
+          let el = document.createElement("src-obj");
+          el.setAttribute("type", SOURCE_TYPE_TEXTS[type]);
+          el.setAttribute("name", this.file.name);
+          el.srcObj = this;
+          let detail = document.createElement("div");
+          this.__el = el;
+          this.__detail = detail;
+          this.__preview = null;
+          this.width = 0;
+          this.height = 0;
+          this.aspect = {begin:1, end:1};
+          this.keepAspect = true;
+          this.options = [
+            new SourceOption({
+              x: new OptionValue(0),
+              y: new OptionValue(0),
+              posOrigin: "top-left",
+              posOriginRoot: "top-left",
+              scale: new OptionValue(1),
+              alpha: new OptionValue(0),
+              rotate: new OptionValue(0),
+              width: new OptionValue(this.width),
+              height: new OptionValue(this.height),
+              frames: [0, 1], //表示フレームのどの範囲か
+              span: [0, 1], //もとのソースのフレームのどの範囲か
+              timeScale: 1,
+              length: 0,
+              effects: []
+            }, this.__el),
+          ];
+          this.setupDetail();
+          for (let option of this.options) {
+            option.addEventListener("change", (e)=>{
+              if (e.key == "x") {
+                this.__preview.style.left = "calc(var(--unit-px) * " + e.value.curValue + "px" + (e.target.posOriginRoot=="center"?" + 50%":"") + ")";
+              } else if (e.key == "y") {
+                this.__preview.style.top = "calc(var(--unit-px) * " + e.value.curValue + "px" + (e.target.posOriginRoot=="center"?" + 50%":"") + ")";
+              } else if (e.key == "width") {
+                this.__preview.style.width = (e.value.curValue || 0) + "px";
+                if (!this.keepAspect) {
+                  this.aspect.begin = e.value.curValue / e.target.height.begin;
+                  this.aspect.end = e.value.end / e.target.height.end;
+                }
+              } else if (e.key == "height") {
+                this.__preview.style.height = (e.value.curValue || 0) + "px";
+                if (!this.keepAspect) {
+                  this.aspect.begin = e.target.width.begin / e.value.begin;
+                  this.aspect.end = e.target.width.end / e.value.end;
+                }
+              } else if (e.key == "rotate") {
+                this.__preview.style.rotate = e.value.curValue + "deg";
+              } else if (e.key == "alpha") {
+                this.__preview.style.opacity = (1 - e.value.curValue) * 100 + "%";
+              } else if (e.key == "span") {
+                e.target.frames = [e.target.frames[0], e.target.frames[0] + Math.round((e.target.span[1] - e.target.span[0]) * e.target.timeScale)];
+              } else if (e.key == "frames") {
+                e.target.timeScale = (e.target.span[1] - e.target.span[0]) / (e.target.frames[1] - e.target.frames[0]);
+              } else if (e.key == "posOrigin") {
+                if (e.value == "top-left") {
+                  this.__preview.style.translate = "";
+                } else if (e.value == "center") {
+                  this.__preview.style.translate = "-50% -50%";
+                }
+              } else if (e.key == "posOriginRoot") {
+                e.target.x = e.target.x;
+                e.target.y = e.target.y;
+              }
+            });
+          }
+        }
+        get type() {
+          return this.__type;
+        }
+        get sourceElement() {
+          return this.__el;
+        }
+        get detailElement() {
+          return this.__detail;
+        }
+        get previewElement() {
+          return this.__preview;
+        }
+        setupDetail() {
+          let px = document.createElement("span");
+          px.setAttribute("class", "px");
+          px.innerText = "px";
+          let percent = document.createElement("span");
+          percent.setAttribute("class", "percent");
+          percent.innerText = "%";
+          let degree = document.createElement("span");
+          degree.setAttribute("class", "degree");
+          degree.innerText = "度";
+          let ms = document.createElement("span");
+          ms.setAttribute("class", "ms");
+          ms.innerText = "ms";
+
+          let div = document.createElement("div");
+          let label = document.createElement("label");
+          label.innerText = "ソースの範囲";
+          let span = [
+            document.createElement("input"),
+            document.createElement("input")
+          ];
+          span[0].setAttribute("class", "span-start");
+          span[1].setAttribute("class", "span-end");
+          div.append(label, span[0], ms.cloneNode(1), span[1], ms.cloneNode(1));
+          this.__detail.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "表示する期間";
+          let frames = [
+            document.createElement("input"),
+            document.createElement("input")
+          ];
+          frames[0].setAttribute("class", "frames-start");
+          frames[1].setAttribute("class", "frames-end");
+          div.append(label, frames[0], ms.cloneNode(1), frames[1], ms.cloneNode(1));
+          this.__detail.appendChild(div);
+
+          let poses = document.createElement("div");
+          poses.setAttribute("class", "first");
+
+          let xy = document.createElement("div");
+          xy.setAttribute("class", "xy");
+          poses.appendChild(xy);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "x座標";
+          label.setAttribute("for", "posx");
+          let posX = document.createElement("transitional-input");
+          posX.setAttribute("name", "posx");
+          posX.setAttribute("type", "number");
+          div.append(label, posX);
+          xy.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "y座標";
+          label.setAttribute("for", "posy");
+          let posY = document.createElement("transitional-input");
+          posY.setAttribute("name", "posy");
+          posY.setAttribute("type", "number");
+          div.append(label, posY);
+          xy.appendChild(div);
+
+          div = document.createElement("div");
+          let origin = document.createElement("select");
+          let originRoot = document.createElement("select");
+          label = document.createElement("label");
+          label.innerText = "座標の位置";
+          let label2 = document.createElement("label");
+          label2.innerText = "から";
+          origin.setAttribute("name", "origin");
+          origin.append(...[["top-left", "要素の左上"], ["center","要素の中心"]].map((text)=>{
+            let el = document.createElement("option");
+            el.setAttribute("value", text[0]);
+            el.innerText = text[1];
+            if (text[0] == "top-left") {
+              el.setAttribute("selected", "");
+            }
+            return el;
+          }));
+          originRoot.setAttribute("name", "origin-root");
+          originRoot.append(...[["top-left", "画面の左上"], ["center","画面の中心"]].map((text)=>{
+            let el = document.createElement("option");
+            el.setAttribute("value", text[0]);
+            el.innerText = text[1];
+            if (text[0] == "top-left") {
+              el.setAttribute("selected", "");
+            }
+            return el;
+          }));
+          div.append(label, originRoot, label2, origin);
+          let div2 = document.createElement("div");
+          div2.appendChild(div);
+          poses.appendChild(div2);
+          this.__detail.append(poses);
+
+
+          let sizes = document.createElement("div");
+          sizes.setAttribute("class", "first");
+
+          let size = document.createElement("div");
+          size.setAttribute("class", "size");
+
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "横幅";
+          label.setAttribute("for", "width");
+          let inputs = document.createElement("div");
+          inputs.setAttribute("class", "inputs");
+          let width = [document.createElement("transitional-input"), document.createElement("transitional-input")];
+          width[0].setAttribute("name", "width");
+          width[0].setAttribute("type", "number");
+          width[1].setAttribute("name", "widthp");
+          width[1].setAttribute("type", "number");
+          inputs.append(width[0], px.cloneNode(1), width[1], percent.cloneNode(1))
+          div.append(label, inputs);
+          size.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "高さ";
+          label.setAttribute("for", "height");
+          inputs = document.createElement("div");
+          inputs.setAttribute("class", "inputs");
+          let height = [document.createElement("transitional-input"), document.createElement("transitional-input")];
+          height[0].setAttribute("name", "height");
+          height[0].setAttribute("type", "number");
+          height[1].setAttribute("name", "heightp");
+          height[1].setAttribute("type", "number");
+          inputs.append(height[0], px.cloneNode(1), height[1], percent.cloneNode(1))
+          div.append(label, inputs);
+          size.appendChild(div);
+          sizes.append(size);
+
+          let aspectLock = document.createElement("input");
+          aspectLock.setAttribute("type", "checkbox");
+          aspectLock.setAttribute("name", "aspect-lock");
+          aspectLock.setAttribute("checked", "");
+          sizes.appendChild(aspectLock);
+          this.__detail.append(sizes);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "回転";
+          label.setAttribute("for", "rotate");
+          let rotate = document.createElement("transitional-input");
+          rotate.setAttribute("name", "rotate");
+          rotate.setAttribute("type", "number");
+          div.append(label, rotate, degree.cloneNode(1));
+          this.__detail.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "透明度";
+          label.setAttribute("for", "alpha");
+          let alpha = document.createElement("transitional-input");
+          alpha.setAttribute("name", "alpha");
+          alpha.setAttribute("type", "number");
+          div.append(label, alpha, percent.cloneNode(1));
+          this.__detail.appendChild(div);
+
+          span[0].addEventListener("change", (e)=>{let value = Math.max(0, Math.round(e.target.value * main.fps.video)); this.options[0].span = [value, this.options[0].span[1] - this.options[0].span[0] + value];});
+          span[1].addEventListener("change", (e)=>{let value = Math.max(0, Math.round(e.target.value * main.fps.video)); this.options[0].span = [Math.min(value, this.options[0].span[0]), value];});
+          frames[0].addEventListener("change", (e)=>{let value = Math.max(0, Math.round(e.target.value * main.fps.video)); this.options[0].frames = [value, this.options[0].frames[1] - this.options[0].frames[0] + value];let layer=main.layers.findIndex((layer)=>layer.indexOf(this)>=0);if(layer>=0){let index=main.layers[layer].indexOf(this);main.pushSrcAt(layer, index, this);main.removeSrcAt(layer, index);}});
+          frames[1].addEventListener("change", (e)=>{let value = Math.max(0, Math.round(e.target.value * main.fps.video)); this.options[0].frames = [Math.min(value, this.options[0].frames[0]), value];let layer=main.layers.findIndex((layer)=>layer.indexOf(this)>=0);if(layer>=0){let index=main.layers[layer].indexOf(this);main.pushSrcAt(layer, index, this);main.removeSrcAt(layer, index);}});
+
+          posX.begin.addEventListener("change", (e)=>{this.options[0].x.begin = Math.round(parseFloat(e.target.value || 0) * 100) / 100;});
+          posX.end.addEventListener("change", (e)=>{this.options[0].x.end = Math.round(parseFloat(e.target.value || 0) * 100) / 100;});
+          posY.begin.addEventListener("change", (e)=>{this.options[0].y.begin = Math.round(parseFloat(e.target.value || 0) * 100) / 100;});
+          posY.end.addEventListener("change", (e)=>{this.options[0].y.end = Math.round(parseFloat(e.target.value || 0) * 100) / 100;});
+          origin.addEventListener("change", (e)=>{this.options[0].posOrigin = e.target.value;});
+          originRoot.addEventListener("change", (e)=>{this.options[0].posOriginRoot = e.target.value;});
+          width[0].begin.addEventListener("change", (e)=>{this.options[0].width.begin = Math.round(parseFloat(e.target.value || 0) * 100) / 100;if(this.keepAspect){this.options[0].height.begin = this.options[0].width.begin / this.aspect.begin;}});
+          width[0].end.addEventListener("change", (e)=>{this.options[0].width.end = Math.round(parseFloat(e.target.value || 0) * 100) / 100;if(this.keepAspect){this.options[0].height.end = this.options[0].width.end / this.aspect.end;}});
+          height[0].begin.addEventListener("change", (e)=>{this.options[0].height.begin = Math.round(parseFloat(e.target.value || 0) * 100) / 100;if(this.keepAspect){this.options[0].width.begin = this.options[0].height.begin * this.aspect.begin;}});
+          height[0].end.addEventListener("change", (e)=>{this.options[0].height.end = Math.round(parseFloat(e.target.value || 0) * 100) / 100;if(this.keepAspect){this.options[0].width.end = this.options[0].height.end * this.aspect.end;}});
+          width[1].begin.addEventListener("change", (e)=>{this.options[0].width.begin = Math.round(this.width * parseFloat(e.target.value || 0)) / 100;if(this.keepAspect){this.options[0].height.begin = this.options[0].width.begin / this.aspect.begin;}});
+          width[1].end.addEventListener("change", (e)=>{this.options[0].width.end = Math.round(this.width * parseFloat(e.target.value || 0)) / 100;if(this.keepAspect){this.options[0].height.end = this.options[0].width.end / this.aspect.end;}});
+          height[1].begin.addEventListener("change", (e)=>{this.options[0].height.begin =  Math.round(this.height * parseFloat(e.target.value || 0)) / 100;if(this.keepAspect){this.options[0].width.begin = this.options[0].height.begin * this.aspect.begin;}});
+          height[1].end.addEventListener("change", (e)=>{this.options[0].height.end =  Math.round(this.height * parseFloat(e.target.value || 0)) / 100;if(this.keepAspect){this.options[0].width.end = this.options[0].height.end * this.aspect.end;}});
+          rotate.begin.addEventListener("change", (e)=>{this.options[0].rotate.begin = Math.round(parseFloat(e.target.value || 0) * 100) / 100;});
+          rotate.end.addEventListener("change", (e)=>{this.options[0].rotate.end = Math.round(parseFloat(e.target.value || 0) * 100) / 100;});
+          alpha.begin.addEventListener("change", (e)=>{this.options[0].alpha.begin = Math.round(parseFloat(e.target.value || 0) * 100) / 10000;});
+          alpha.end.addEventListener("change", (e)=>{this.options[0].alpha.end = Math.round(parseFloat(e.target.value || 0) * 100) / 10000;});
+          aspectLock.addEventListener("change", (e)=>{this.keepAspect = e.target.checked;});
+
+          this.options[0].addEventListener("change", (e)=>{
+            if (e.key == "x") {
+              posX.begin.value = e.value.begin;
+              posX.end.value = e.value.end;
+            } else if (e.key == "y") {
+              posY.begin.value = e.value.begin;
+              posY.end.value = e.value.end;
+            } else if (e.key == "width") {
+              width[0].begin.value = this.options[0].width.begin;
+              width[0].end.value = this.options[0].width.end;
+              width[1].begin.value = this.width? Math.round(10000 * this.options[0].width.begin / this.width) / 100: 100;
+              width[1].end.value = this.width? Math.round(10000 * this.options[0].width.end / this.width) / 100: 100;
+            } else if (e.key == "height") {
+              height[0].begin.value = this.options[0].height.begin;
+              height[0].end.value = this.options[0].height.end;
+              height[1].begin.value = this.height? Math.round(10000 * this.options[0].height.begin / this.height) / 100 : 100;
+              height[1].end.value = this.height? Math.round(10000 * this.options[0].height.end / this.height) / 100 : 100;
+            } else if (e.key == "alpha") {
+              alpha.begin.value = Math.round(e.value.begin * 10000) / 100;
+              alpha.end.value = Math.round(e.value.end * 10000) / 100;
+            } else if (e.key == "span") {
+              span[0].value = Math.round(e.value[0] / main.fps.video);
+              span[1].value = Math.round(e.value[1] / main.fps.video);
+            } else if (e.key == "frames") {
+              frames[0].value = Math.round(e.value[0] / main.fps.video);
+              frames[1].value = Math.round(e.value[1] / main.fps.video);
+            }
+          });
+          this.options[0].redraw();
+        }
+        async decodeReady() {
+        }
+        async getFrame(frame) {
+        }
+        async decodeCleanup() {
+        }
+        static async getSourceFromFileHandle(fileHandle) {
+          if (!FileSystemFileHandle.prototype.isPrototypeOf(fileHandle)) {
+            throw "given fileHandle is not a FileSystemFileHandle instance";
+            return;
+          }
+          console.log(fileHandle.name);
+          let file = await fileHandle.getFile();
+          let path = (await main.dir.resolve(fileHandle)).join("/");
+          const format = file.name.match(/(?:(?<=\.)[a-zA-Z0-9]*)?$/)[0].toLowerCase();
+          return new this(file, path, format);
+        }
+        static getSourceFromFileHandles(fileHandleList) {
+          let promises = [];
+          for (let fileHandle of fileHandleList) {
+            promises.push(this.getSourceFromFileHandle(fileHandle));
+          }
+          return Promise.allSettled(promises);
+        }
+        static getSourceFromArrayBuffer(arrayBuffer) {
+          console.log(arrayBuffer);
+          return arrayBuffer;
+        }
+      }
+
+      class VideoSource extends SourceBase {
+        static SUPPORTED = ["mp4",];
+        static check(file) {
+          return file.name.startsWith("video/");
+        }
+        constructor(file, path, arrayBuffer, format="mp4") {
+          super(file, path, format, SOURCE_TYPES.VIDEO);
+          this.arrayBuffer = arrayBuffer;
+          this.options.forEach((option)=>{
+            let addition = {
+              volume: 1
+            };
+            for (let key of Object.keys(addition)) {
+              option.addKey(key, addition[key]);
+            }
+            option.addEventListener("change", (e)=>{
+              if (e.key == "timeScale") {
+                this.__preview.playbackRate = isFinite(e.value)?e.value:1.0;
+              } else if (e.key == "volume") {
+                this.__preview.volume = e.value;
+              }
+            });
+          });
+          this.__preview = document.createElement("video");
+          this.__curChunk = 0;
+          this.options[0].width.begin = this.options[0].width.end = undefined;
+          this.options[0].height.begin = this.options[0].height.end = undefined;
+          this.__preview.addEventListener("loadedmetadata", (e)=>{
+            this.aspect = {begin:this.__preview.videoWidth / this.__preview.videoHeight, end:this.__preview.videoWidth / this.__preview.videoHeight};
+            this.width = this.__preview.videoWidth;
+            this.height = this.__preview.videoHeight;
+            if (this.options[0].width == undefined || this.options[0].height == undefined) {
+              this.options[0].width.begin = this.options[0].width.end = this.width;
+              this.options[0].height.begin = this.options[0].height.end = this.height;
+            }
+          });
+          this.__preview.src = URL.createObjectURL(file);
+          let tracks = [];
+          if (!this.constructor.SUPPORTED.includes(this.format)) {
+            throw "given video format is not supported";
+          } else if (this.format == "mp4") {
+            let leaf_list = ['ctab', 'co64', 'fiel', 'mdat', 'rdrf', 'rmcd', 'rmcs', 'rmdr', 'rmqu', 'rmvc', 'wfex', 'cmvd', 'co64', 'dcom', 'elst', 'gmhd', 'hdlr', 'mdhd', 'smhd', 'stco', 'stsc', 'stsd', 'stss', 'stsz', 'stts', 'tkhd', 'tname', 'udta', 'vmhd'];
+            let parent_list = ['cmov', 'ctts', 'dinf', 'edts', 'esds', 'free', 'ftyp', 'iods', 'junk', 'mdia', 'minf', 'moov', 'mvhd', 'pict', 'pnot', 'rmda', 'rmra', 'skip', 'stbl', 'trak', 'uuid', 'wide'];
+            const array = new Uint8Array(arrayBuffer);
+            let i = 0;
+            let indexes = [[0, array.length], [-1, 0],];
+            let deep = 0;
+            let text = "";
+            let track;
+            while (i < array.length) {
+              indexes.at(-1)[0] += 1;
+              let start = i;
+              let len = array.slice(i, i+4).reduce((total, i)=>total*256+i,0);
+              i += 4;
+              let type = array.slice(i, i+4).reduce((total, i)=>total+String.fromCharCode(i),"");
+              i += 4;
+              if (len == 1) {
+                len = array.slice(i, i+8).reduce((total, i)=>total*256+i,0);
+                i += 8;
+              }
+              indexes.at(-1)[1] += len;
+              let isLeaf = leaf_list.includes(type);
+              if (!isLeaf) {
+                var nextType = array.slice(i+4, i+8).reduce((total, i)=>total+String.fromCharCode(i),"");
+                isLeaf = !leaf_list.includes(nextType) && !parent_list.includes(nextType);
+              }
+              if (type=="trak") {
+                track = {
+                  timestamp: 0,
+                  timeScale: 1,
+                  colorSpace: new VideoColorSpace(),
+                  hardwareAcceleration: "prefer-software",
+                  optimizeForLatency: true
+                };
+                tracks.push(track);
+              }
+              if (type == "tkhd") {
+                switch (array.slice(i+(1+3+4*5+8+2), i+(1+3+4*5+8+2+2)).reduce((total, i)=>total*256+i, 0)) {
+                  case 0:
+                    track.type = 'video';
+                    break;
+                  case 1:
+                    track.type = 'audio';
+                    break;
+                  case 2:
+                    track.type = 'subtitle';
+                    break;
+                }
+                /* if (!track.width || !track.height) {
+                  track.width = array.slice(i+(1+3+4*5+8+2*4+36), i+(1+3+4*5+8+2*4+36+4-2)).reduce((total, i)=>total*256+i, 0) + array.slice(i+(1+3+4*5+8+2*4+36+4-2), i+(1+3+4*5+8+2*4+36+4)).reverse().reduce((total, i)=>total/256+i.toString(2).padStart(8, "0").match(/./g).reverse().reduce((total, i)=>total/2 + i/2, 0), 0);
+                  track.height = array.slice(i+(1+3+4*5+8+2*4+36+4), i+(1+3+4*5+8+2*4+36+4+4-2)).reduce((total, i)=>total*256+i, 0) + array.slice(i+(1+3+4*5+8+2*4+36+4+4-2), i+(1+3+4*5+8+2*4+36+4+4)).reverse().reduce((total, i)=>total/256+i.toString(2).padStart(8, "0").match(/./g).reverse().reduce((total, i)=>total/2 + i/2, 0), 0);
+                } */
+              }
+              if (type == "mdhd") {
+                track.timeScale = array.slice(i+(1+3+4*2), i+(1+3+4*3)).reduce((total, i)=>total*256+i, 0)/1000;
+                track.duration = array.slice(i+(1+3+4*3), i+(1+3+4*4)).reduce((total, i)=>total*256+i, 0);
+              }
+              if (type == "stsd") {
+                let entrylen = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i);
+                let index = 0;
+                track.sampleDescriptions = [];
+                for (let entry=0; entry < entrylen; entry++) {
+                  let size = array.slice(i+(1+3+4 + index), i+(1+3+4+index+4)).reduce((total, i)=>total*256+i, 0);
+                  index += 4;
+                  if (size == 0) {
+                    continue;
+                  }
+                  let codec = array.slice(i+(1+3+4+index), i+(1+3+4+index+4)).reduce((total, i)=>total+String.fromCharCode(i), "")
+                  let description = {
+                    codec: codec,
+                    referenceIndex: array.slice(i+(1+3+4+10+index), i+(1+3+4+10+index+2)).reduce((total, i)=>total*256+i, 0)
+                  };
+                  index += 12;
+                  if (["mp4v", "avc1"].includes(codec)) {
+                    index += 16;
+                    //track.width = array.slice(i+(1+3+4+index), i+(1+3+4+index+2)).reduce((total, i)=>total*256+i, 0);
+                    index += 2;
+                    //track.height = array.slice(i+(1+3+4+index), i+(1+3+4+index+2)).reduce((total, i)=>total*256+i, 0);
+                    //console.log([array.slice(i+(1+3+4+index+2), i+(1+3+4+index+6)), array.slice(i+(1+3+4+index+6), i+(1+3+4+index+10))]);
+                    index += 52;
+                    let i2 = 1+3+4;
+                    while (i2+index < size) {
+                      let start = i2;
+                      let len = array.slice(i+index+i2, i+index+i2+4).reduce((total, i)=>total*256+i,0);
+                      i2 += 4;
+                      let type = array.slice(i+index+i2, i+index+i2+4).reduce((total, i)=>total+String.fromCharCode(i),"");
+                      console.log(type);
+                      i2 += 4;
+                      if (len == 1) {
+                        let len = array.slice(i+index+i2, i+index+i2+8).reduce((total, i)=>total*256+i,0);
+                        i2 += 8;
+                      }
+                      if (type == "avcC") {
+                        description.AVCDecoderDescriptionRecord = array.slice(i+index+i2, i+index+start+len);
+                      }
+                      i2 = start + len;
+                    }
+                  }
+                  track.sampleDescriptions.push(description);
+                }
+              }
+              if (type == "stts") { // Time-to-Sample
+                track.timeToSample = [];
+                let entrylen = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i);
+                let index = 0;
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.timeToSample.push({
+                    count: array.slice(i+(1+3+4 + index), i+(1+3+4+index+4)).reduce((total, i)=>total*256+i, 0),
+                    duration: array.slice(i+(1+3+4 + index+4), i+(1+3+4+index+8)).reduce((total, i)=>total*256+i, 0)
+                  });
+                  index += 8;
+                }
+              }
+              if (type == "stsc") { // Sample-to-Chunk
+                track.sampleToChunk = [];
+                let entrylen = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i, 0);
+                let index = 0;
+                console.log(entrylen);
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.sampleToChunk.push({
+                    first: array.slice(i+(1+3+4 + index), i+(1+3+4+index+4)).reduce((total, i)=>total*256+i, 0),
+                    samplesPerChunk: array.slice(i+(1+3+4 + index+4), i+(1+3+4+index+8)).reduce((total, i)=>total*256+i, 0),
+                    descriptionId: array.slice(i+(1+3+4 + index+8), i+(1+3+4+index+12)).reduce((total, i)=>total*256+i, 0)
+                  });
+                  index += 12;
+                }
+              }
+              if (type == "stss") { // Sync Sample
+                track.syncSample = [];
+                let entrylen = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i);
+                let index = 0;
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.syncSample.push(array.slice(i+(1+3+4 + index), i+(1+3+4+index+4)).reduce((total, i)=>total*256+i, 0));
+                  index += 4;
+                }
+              }
+              if (type == "stsz") { // Sample Size
+                track.sampleSize = [];
+                let index = 0;
+                let size = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i, 0);
+                let entrylen = array.slice(i+(1+3+4), i+(1+3+4*2)).reduce((total, i)=>total*256+i);
+                console.log([size, entrylen]);
+                if (size > 0) {
+                  for (let entry=0; entry < entrylen; entry++) {
+                    track.sampleSize.push(size);
+                  }
+                } else {
+                  for (let entry=0; entry < entrylen; entry++) {
+                    track.sampleSize.push(array.slice(i+(1+3+4*2 + index), i+(1+3+4*2+index+4)).reduce((total, i)=>total*256+i, 0));
+                    index += 4;
+                  }
+                }
+              }
+              if (type == "stco") { // Chunk Offset
+                track.chunkOffset = [];
+                let entrylen = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i);
+                let index = 0;
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.chunkOffset.push(array.slice(i+(1+3+4 + index), i+(1+3+4+index+4)).reduce((total, i)=>total*256+i, 0));
+                  index += 4;
+                }
+              }
+              if (type == "co64") { // Chunk Offset 64bits
+                track.chunkOffset = [];
+                let entrylen = array.slice(i+(1+3), i+(1+3+4)).reduce((total, i)=>total*256+i);
+                let index = 0;
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.chunkOffset.push(array.slice(i+(1+3+4 + index), i+(1+3+4+index+8)).reduce((total, i)=>total*256+i, 0));
+                  index += 8;
+                }
+              }
+              if (isLeaf) {
+                text = text + "  ".repeat(deep)+" "+type+" - "+len + "\n";
+                while (indexes.length > 1 && indexes.at(-2)[1] <= start+len) {
+                  deep -= 1;
+                  indexes.pop();
+                }
+                i = start + len;
+              } else {
+                text = text + "  ".repeat(deep)+" "+type + "\n";
+                deep += 1;
+                indexes.push([-1, i]);
+              }
+              if (indexes.length == 0) {
+                break;
+              }
+            }
+            console.log(text);
+          }
+          console.log(tracks);
+          this.tracks = tracks;
+          this.options[0].span = this.options[0].frames = [0, Math.ceil(main.fps.video * ((track)=>track.duration/track.timeScale)(tracks.find((track)=>track.type=="video")))];
+          this.__preview.load();
+        }
+        async decodeReady() {
+          this.chunks = [];
+          this.decoders = [];
+          this.frames = [];
+          this.decodedFrame = 0;
+          for (let track of this.tracks) {
+            if (track.type == "video") {
+              try {
+                track.description = track.sampleDescriptions.find((value)=>["mp4v", "avc1", "av01"].includes(value.codec));
+                if (track.description == undefined) { continue; }
+                track.codec = track.description.codec;
+                console.log(track.codec);
+              } catch { continue; }
+              if (["mp4a", "mp4v"].includes(track.codec)) {
+                track.codec = track.codec + ".oo.V";
+              } else if (track.codec == "avc1") {
+                ;
+              } else if (track.codec == "av01") {
+                track.codec = "av01.0.15M.10";
+              }
+              track.chunks = [];
+              if (track.sampleSize.length == 1) {
+                let sampleSize = track.sampleSize[0];
+                track.sampleSize = [];
+                let entrylen = track.timeToSample.reduce((total, i)=>total+i.count, 0);
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.sampleSize.push(sampleSize);
+                }
+              }
+              let timestamp = track.timestamp;
+              for (let i=0; i < track.chunkOffset.length; i++) {
+                let samplePos = [0, 0];
+                let durations = [];
+                for (let index = 0; index < i+1; index++) {
+                  let len = track.sampleToChunk.reduce((total, i)=>total*(i.first > index+1)+i.samplesPerChunk*(i.first <= index+1), 0);
+                  samplePos[0] += len;
+                  samplePos[1] = len;
+                }
+                samplePos[0] -= samplePos[1]
+                let samplelen = 0;
+                for (let index = 0; index < track.timeToSample.length; index++) {
+                  //console.log(track.timeToSample.at(index));
+                  for (let sample = Math.max(samplelen, samplePos[0]); sample < samplePos[0]+samplePos[1]; sample++) {
+                    durations.push(track.timeToSample.at(index).duration);
+                  }
+                  samplelen += track.timeToSample.at(index).count;
+                }
+                //let len = new Uint8Array(this.arrayBuffer.slice(track.chunkOffset[i], track.chunkOffset[i]+4)).reduce((total, i)=>total*256+i, 0);
+                if (i == 0) {console.log(samplePos)}
+                let sizes = track.sampleSize.slice(samplePos[0], samplePos[0]+samplePos[1]);
+                let len = sizes.reduce((total, i)=>total+i, 0);
+                //console.log(samplePos);
+                let offset = 0;
+                let sample = samplePos[0]+1;
+                for (let size of sizes) {
+                  track.chunks.push(new EncodedVideoChunk({
+                    type: "key".repeat(track.syncSample.includes(sample))+"delta".repeat(!track.syncSample.includes(sample)),
+                    data: this.arrayBuffer.slice(track.chunkOffset[i]+offset, track.chunkOffset[i]+offset+size),
+                    timestamp: Math.floor(timestamp * 1000 / track.timeScale),
+                    duration: Math.floor(durations[0] * 1000 / track.timeScale)
+                  }));
+                  timestamp += durations.splice(0, 1)[0] / track.timeScale;
+                  sample += 1;
+                  offset += size;
+                }
+                // Math.ceil(1000 * track.duration / track.timeScale)
+              }
+              let decoder = new VideoDecoder({output:(frame)=>{this.frames.push(frame);}, error:(e)=>{throw e;}});
+              console.log(track.codec);
+              let config = {
+                codec: track.codec,
+                colorSpace: track.colorSpace,
+                hardwareAcceleration:track.hardwareAcceleration,
+                optimizeForLatency:track.optimizeForLatency
+              };
+              if (track.description.codec == "avc1") {
+                config.description = track.description.AVCDecoderDescriptionRecord;
+                config.codec = "avc1."+config.description[1].toString(16).padStart(2, "0")+config.description[2].toString(16).padStart(2, "0")+config.description[3].toString(16).padStart(2, "0")
+              }
+              decoder.configure(config);
+              this.decoders.push(decoder);
+              /* setTimeout(()=>{console.log(this);}, 100);
+              for (let chunk of track.chunks) {
+                decoder.decode(chunk);
+                this.chunks.push(chunk);
+              } */
+            }
+          }
+        }
+        async getFrame(frame) {
+          let track = this.tracks.find((track)=>track.type=="video"&&track.description!=undefined);
+          if (frame <= this.decodedFrame) {
+            await this.decoders[0].flush();
+            this.frames.forEach((i)=>i.close());
+            this.frames = [];
+            this.__curChunk = 0;
+            this.decodedFrame = 0;
+          }
+          while (this.frames.reduce((total, i)=>total+(i.duration / (1000 ** 2)) * main.fps.video, this.decodedFrame) / this.options[0].timeScale <= frame || (track.chunks.length > this.__curChunk+1 && track.chunks.at(this.__curChunk+1).type != "key")) {
+            let chunk = track.chunks.at(this.__curChunk);
+            this.__curChunk += 1;
+            if (chunk) {
+              this.decoders[0].decode(chunk);
+            } else {
+              break;
+            }
+            if (track.chunks.length <= this.__curChunk || track.chunks.at(this.__curChunk).type == "key") {
+              await this.decoders[0].flush();
+            }
+          }
+          while (this.frames.length > 0 && ((this.frames[0].duration / (1000 ** 2)) * main.fps.video + this.decodedFrame) / this.options[0].timeScale < frame) {
+            for (let i of this.frames.splice(0, 1)) {
+              this.decodedFrame += (i.duration / (1000 ** 2)) * main.fps.video;
+              i.close();
+            }
+            if (this.frames.length == 0) {
+              break;
+            }
+          }
+          return this.frames.at(0);
+        }
+        static async getSourceFromFileHandle(fileHandle) {
+          if (!FileSystemFileHandle.prototype.isPrototypeOf(fileHandle)) {
+            throw "given fileHandle is not a FileSystemFileHandle instance";
+            return;
+          }
+          console.log(fileHandle.name);
+          let file = await fileHandle.getFile();
+          let path = (await main.dir.resolve(fileHandle)).join("/");
+          const format = file.name.match(/(?:(?<=\.)[a-zA-Z0-9]*)?$/)[0].toLowerCase();
+          let arrayBuffer = await file.arrayBuffer();
+          return new this(file, path, arrayBuffer, format);
+        }
+      }
+
+      class AudioSource extends SourceBase {
+        static check(file) {
+          return file.name.startsWith("audio/");
+        }
+        constructor(file, path, audioBuffer, format="wav") {
+          super(file, path, format, SOURCE_TYPES.AUDIO);
+          this.audioBuffer = audioBuffer;
+          this.options[0].span = this.options[0].frames = [0, Math.ceil(this.audioBuffer.duration * main.fps.audio * 1000)];
+          this.__preview = document.createElement("audio");
+          this.__preview.src = URL.createObjectURL(file);
+          this.options.forEach((option)=>{
+            let addition = {
+              volume: 1
+            };
+            for (let key of Object.keys(addition)) {
+              option.addKey(key, addition[key]);
+            }
+            option.addEventListener("change", (e)=>{
+              if (e.key == "timeScale") {
+                this.__preview.playbackRate = isFinite(e.value)?e.value:1.0;
+              } else if (e.key == "volume") {
+                this.__preview.volume = e.value;
+              }
+            });
+          });
+        }
+        async decodeReady(ctx) {
+        }
+        static async getSourceFromFileHandle(fileHandle) {
+          if (!FileSystemFileHandle.prototype.isPrototypeOf(fileHandle)) {
+            throw "given fileHandle is not a FileSystemFileHandle instance";
+            return;
+          }
+          console.log(fileHandle.name);
+          let file = await fileHandle.getFile();
+          let path = (await main.dir.resolve(fileHandle)).join("/");
+          const format = file.name.match(/(?:(?<=\.)[a-zA-Z0-9]*)?$/)[0].toLowerCase();
+          let arrayBuffer = await file.arrayBuffer();
+          let ctx = new AudioContext();
+          let audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+          return new this(file, path, audioBuffer, format);
+        }
+      }
+
+      class ImageSource extends SourceBase {
+        static check(file) {
+          return file.name.startsWith("image/");
+        }
+        constructor(file, path, format) {
+          super(file, path, format, SOURCE_TYPES.IMAGE);
+          this.options[0].span = [0, Math.ceil(1000 * main.fps.video)];
+          if (format == "svg") {
+            this.__svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            file.text().then((text)=>{
+              let m = text.match(/<svg *(?<options>(?:(?:[a-zA-Z0-9:]+)(?:=(?:(?:'(?:[^']|\\')*')|(?:"(?:[^"]|\\")*")))? *)*) *>(?<innerHTML>(?:.|\s)*)<\/svg>/);
+              let options = m.groups.options.matchAll(/(?<key>[a-zA-Z0-9:]+)(?:=(?<quote>['"])(?<value>(?:(?!\k<quote>).|\\\k<quote>)*)\k<quote>)?/g);
+              for (let option of options) {
+                if (option.groups.key == "width" && option.groups.value.endsWith("px")) {
+                  this.width = parseFloat(option.groups.value);
+                } else if (option.groups.key == "height" && option.groups.value.endsWith("px")) {
+                  this.height = parseFloat(option.groups.value);
+                } else if (option.groups.key == "viewBox") {
+                  let box = option.groups.value.match(/(?<top>-?[0-9.]+) (?<left>-?[0-9.]+) (?<width>-?[0-9.]+) (?<height>-?[0-9.]+)/);
+                  if (box) {
+                    if (this.width == undefined) {
+                      this.width = parseFloat(box.groups.width);
+                    }
+                    if (this.height == undefined) {
+                      this.height = parseFloat(box.groups.height);
+                    }
+                  }
+                }
+                this.__svg.setAttribute(option.groups.key, option.groups.value||"");
+              }
+              this.__svg.innerHTML = m.groups.innerHTML;
+              this.__preview = this.__svg.cloneNode(true);
+              this.aspect.begin = this.aspect.end = this.width / this.height;
+              if (this.options[0].width == undefined || this.options[0].height == undefined) {
+                this.options[0].width.begin = this.options[0].width.end = this.width;
+                this.options[0].height.begin = this.options[0].height.end = this.height;
+              }
+              this.options[0].addEventListener("change", (e)=>{
+                if (e.key == "width" || e.key == "height") {
+                  this.__preview.setAttribute(e.key, e.value.curValue + "px");
+                }
+              });
+            });
+          } else {
+            this.__preview = document.createElement("img");
+            this.__preview.src = URL.createObjectURL(file);
+            this.__preview.decode().then(()=>{
+              this.width = this.__preview.naturalWidth;
+              this.height = this.__preview.naturalHeight;
+              this.aspect = {begin:this.width / this.height, end:this.width / this.height};
+              if (this.options[0].width == undefined || this.options[0].height == undefined) {
+                this.options[0].width.begin = this.options[0].width.end = this.width;
+                this.options[0].height.begin = this.options[0].height.end = this.height;
+              }
+            });
+          }
+        }
+        async decodeReady() {
+          this.lastFrame = undefined;
+          if (await ImageDecoder.isTypeSupported(this.file.type)) {
+            let arrayBuffer = await this.file.arrayBuffer();
+            this.decoder = new ImageDecoder({type:this.file.type, data:arrayBuffer, premultiplyAlpha:"none", colorSpaceConversion:"none"});
+          } else if (this.format == "svg") {
+            this.decoder = ()=>{};
+            this.decoder.decode = async (options)=>{
+              let frame = options.index || 0;
+              let width = this.options[0].width.curValue;
+              let height = this.options[0].height.curValue;
+              let videoFrame = await convertSVGToVideoFrame(this.__svg, {ms: 1000 * frame / main.fps.video, width: width, height: height});
+              return {
+                image: videoFrame,
+                complete: true
+              };
+            };
+          }
+        }
+        async getFrame(frame) {
+          let result;
+          try {
+            return (await this.decoder.decode({index:frame})).image;
+          } catch(e) {
+            console.error(e);
+            return undefined;
+          }
+        }
+      }
+
+      class TextSource extends SourceBase {
+        static check(file) {
+          return false;
+        }
+        constructor(text) {
+          super({name:"テキスト"}, undefined, "", SOURCE_TYPES.TEXT);
+          this.options[0].text = text;
+          this.__preview = document.createElement("div");
+          this.__preview.setAttribute("class", "text");
+          this.__preview.append(
+            document.createElement("p"),
+            document.createElement("p")
+          );
+          this.options[0].span = this.options[0].frames = [0, Math.ceil(1000 * main.fps.video)];
+          this.options.forEach((option)=>{
+            let addition = {
+              text: text,
+              fontFamily: "auto",
+              fontSize: new OptionValue(16),
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: new OptionValue(24),
+              colorR: new OptionValue(0xff),
+              colorG: new OptionValue(0xff),
+              colorB: new OptionValue(0xff)
+           };
+            for (let key of Object.keys(addition)) {
+              option.addKey(key, addition[key]);
+            }
+          });
+          this.calcAll();
+          this.__preview.style.fransformOrigin = "top left";
+          this.options[0].addEventListener("change-width", (e)=>{
+            this.__preview.style.width = "fit-content";
+            this.__preview.style.transform = "scale(" + e.value.curValue / this.width + ", " + this.options[0].height.curValue / this.height + ")";
+          });
+          this.options[0].addEventListener("change-height", (e)=>{
+            this.__preview.style.height = "fit-content";
+            this.__preview.style.transform = "scale(" + this.options[0].width.curValue / this.width + ", " + e.value.curValue / this.height + ")";
+          });
+          this.options[0].addEventListener("posOrigin", (e)=>{
+            if (e.value == "top-left") {
+              this.__preview.style.transformOrigin= "top left";
+            } else if (e.value == "center") {
+              this.__preview.style.tranformOrigin = "center center";
+            }
+          });
+          this.options.forEach((option)=>{option.redraw()});
+        }
+        calcAll() {
+          let dummy = document.createElement("span");
+          dummy.innerText = this.options[0].text;
+          dummy.style.opacity = 0;
+          dummy.style.fontFamily = this.options[0].fontFamily;
+          dummy.style.fontSize = this.options[0].fontSize.begin + "px";
+          dummy.style.fontStyle = this.options[0].fontStyle;
+          dummy.style.fontWeight = this.options[0].fontWeight;
+          dummy.style.lineHeight = (this.options[0].lineHeight.begin || this.options[0].fontSize.begin*1.5) + "px";
+          dummy.style.margin = 0;
+          //dummy.style.width = dummy.style.height = "fit-content";
+          document.body.appendChild(dummy);
+          let rect = dummy.getBoundingClientRect();
+          dummy.remove();
+          this.width = rect.width;
+          this.height = rect.height;
+          this.aspect.begin = this.aspect.end = this.width / this.height;
+          this.options[0].width.begin = this.options[0].width.end = this.width;
+          this.options[0].height.begin = this.options[0].height.end = this.height;
+        }
+        setupDetail() {
+          super.setupDetail();
+          let px = document.createElement("span");
+          px.setAttribute("class", "px");
+          px.innerText = "px";
+          let percent = document.createElement("span");
+          percent.setAttribute("class", "percent");
+          percent.innerText = "%";
+
+          let div = document.createElement("div");
+          let label = document.createElement("label");
+          label.innerText = "テキスト";
+          label.setAttribute("for", "text");
+          let text = document.createElement("textarea");
+          text.setAttribute("name", "text");
+          div.append(label, text);
+          this.__detail.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "フォントサイズ";
+          label.setAttribute("for", "font-size");
+          let size = document.createElement("transitional-input");
+          size.setAttribute("name", "font-size");
+          size.setAttribute("type", "number");
+          div.append(label, size, px.cloneNode(1));
+          this.__detail.appendChild(div);
+
+          /* div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "フォントサイズ";
+          label.setAttribute("for", "font-size");
+          let size = document.createElement("input");
+          alpha.setAttribute("name", "font-size");
+          alpha.setAttribute("type", "number");
+          div.append(label, size, px.cloneNode(1));
+          this.__detail.appendChild(div); */
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "文字の太さ";
+          label.setAttribute("for", "font-weight");
+          let weight = document.createElement("input");
+          weight.setAttribute("name", "font-weight");
+          weight.setAttribute("type", "number");
+          div.append(label, weight);
+          this.__detail.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "行の高さ";
+          label.setAttribute("for", "line-height");
+          let height = document.createElement("transitional-input");
+          height.setAttribute("name", "line-height");
+          height.setAttribute("type", "number");
+          div.append(label, height, px.cloneNode(1));
+          this.__detail.appendChild(div);
+
+          div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "文字の色";
+          label.setAttribute("for", "color");
+          let color = document.createElement("transitional-input");
+          color.setAttribute("name", "color");
+          color.setAttribute("type", "color");
+          div.append(label, color);
+          this.__detail.appendChild(div);
+
+          /* div = document.createElement("div");
+          label = document.createElement("label");
+          label.innerText = "フォントサイズ";
+          label.setAttribute("for", "font-size");
+          let size = document.createElement("input");
+          alpha.setAttribute("name", "font-size");
+          alpha.setAttribute("type", "number");
+          div.append(label, size, px.cloneNode(1));
+          this.__detail.appendChild(div); */
+
+          text.addEventListener("input", (e)=>{this.options[0].text = e.target.value;});
+          //fontFamily.addEventListener("change", (e)=>{this.options[0].fontFamily = e.target.value;});
+          size.begin.addEventListener("change", (e)=>{this.options[0].fontSize.begin = e.target.value;});
+          size.end.addEventListener("change", (e)=>{this.options[0].fontSize.end = e.target.value;});
+          //fontStyle.addEventListener("change", (e)=>{this.options[0].fontStyle = e.target.value;});
+          weight.addEventListener("change", (e)=>{this.options[0].fontWeight = e.target.value;});
+          height.begin.addEventListener("change", (e)=>{this.options[0].lineHeight.begin = e.target.value;});
+          height.end.addEventListener("change", (e)=>{this.options[0].lineHeight.end = e.target.value;});
+          color.begin.addEventListener("change", (e)=>{[this.options[0].colorR.begin, this.options[0].colorG.begin, this.options[0].colorB.begin] = e.target.value.match(/[0-9a-fA-F]{2}/g).map((m)=>parseInt(m, 16));});
+          color.end.addEventListener("change", (e)=>{[this.options[0].colorR.end, this.options[0].colorG.end, this.options[0].colorB.end] = e.target.value.match(/[0-9a-fA-F]{2}/g).map((m)=>parseInt(m, 16));});
+
+          this.options[0].addEventListener("change", (e)=>{
+            /* text: text,
+              fontFamily: "auto",
+              fontSize: 16,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: 24,
+              color: "#ffffff" */
+            if (e.key == "text") {
+              text.value = e.value;
+              this.__preview.children[0].innerText = this.__preview.children[1].innerText = e.value;
+              this.calcAll();
+            } else if (e.key == "fontFamily") {
+              fontFamily.value = this.__preview.style.fontFamily = e.value;
+              this.calcAll();
+            } else if (e.key == "fontSize") {
+              size.begin.value = e.value.begin;
+              size.end.value = e.value.end;
+              this.__preview.style.fontSize = e.value.curValue + "px";
+              this.calcAll();
+            } else if (e.key == "fontStyle") {
+              fontStyle.value = this.__preview.style.fontStyle = e.value;
+              this.calcAll();
+            } else if (e.key == "fontWeight") {
+              weight.value = this.__preview.style.fontWeight = e.value;
+              this.calcAll();
+            } else if (e.key == "lineHeight") {
+              height.begin.value = e.value.begin;
+              height.end.value = e.value.end;
+              this.__preview.style.lineHeight = e.value.curValue + "px";
+              this.calcAll();
+            } else if (["colorR", "colorG", "colorB"].includes(e.key)) {
+              color.begin.value = "#"+this.options[0].colorR.begin.toString(16).padStart(2, "0")+this.options[0].colorG.begin.toString(16).padStart(2, "0")+this.options[0].colorB.begin.toString(16).padStart(2, "0");
+              color.end.value = "#"+this.options[0].colorR.end.toString(16).padStart(2, "0")+this.options[0].colorG.end.toString(16).padStart(2, "0")+this.options[0].colorB.end.toString(16).padStart(2, "0");
+              this.__preview.style.color = "rgb("+this.options[0].colorR.curValue+", "+this.options[0].colorG.curValue+", "+this.options[0].colorB.curValue+")";
+            }
+          });
+          this.options[0].redraw();
+        }
+        async decodeReady() {
+          this.__svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.innerText = this.options[0].text;
+          this.__svg.appendChild(text);
+          this.__svg.setAttribute("viewBox", "0 0 "+this.width+" "+this.height);
+          this.__svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        }
+        async getFrame(frame) {
+          this.__svg.setAttribute("width", this.options[0].width.curValue+"px");
+          this.__svg.setAttribute("height", this.options[0].height.curValue+"px");
+          let videoFrame = await convertSVGToVideoFrame(this.__svg, {width: this.options[0].width.curValue, height: this.options[0].height.curValue});
+          return videoFrame;
+        }
+      }
+
+      class EffectBase extends Object {
+        constructor() {
+          super();
+        }
+        async playPreview() {
+        }
+        async pausePreview() {
+        }
+        async stopPreview() {
+        }
+        preparePreview(el) {
+        }
+        async handleFrame(data) {
+        }
+      }
+
+      class MaskEffect extends EffectBase {
+        constructor() {
+          super();
+          this.animation = undefined;
+        }
+        preparePreview(el, options={}) {
+          if (this.animation) {
+            this.animation.currentTime = 0;
+            this.animation.cancel();
+          }
+          this.animation = el.animate(
+            [
+              {},
+              {width: "0px"}
+            ],
+            {
+              duration: options.frames?(options.frames[1] - options.frames[0])/main.fps.video:0,
+              iterations: 1
+            }
+          );
+          this.animation.pause();
+        }
+        async playPreview() {
+          this.animation.play();
+        }
+        async pausePreview() {
+          this.animation.pause();
+        }
+        async stopPreview() {
+          this.animation.cancel();
+          this.animation.currentTime = 0;
+        }
+        
+      }
+
+      class EditorMain extends EventTarget {
+        constructor() {
+          super();
+          this.ms = 0;
+          this.tree = new SourceClassTree();
+          this.seqUnitIndex = 0;
+          this.playing = false;
+          this.span = [0, 0];
+          this.layers = [[],];
+          this.materials = [];
+          this.fps = {
+            video: 30,
+            audio: 30
+          };
+          this.sampleRate = 48000;
+          this.size = {
+            width: 1920,
+            height: 1080
+          };
+          this.timeScale = 1;
+          this.timelineWidth = document.querySelector(".layers").clientWidth;
+          this.__timelineUnitWidth = -1;
+          this.__points = [];
+          this.ctrlKey = false;
+          this.scrolling = false;
+          this.__scrollTimeout = -1;
+          this.pinchDelta = {x:0, y:0, z:0};
+          if (VideoDecoder == undefined || showOpenFilePicker == undefined || showDirectoryPicker == undefined) {
+            Prompts.showError("\\人人人人人人人人人人人人人人人人人人人人人人人人人人人人人人人人/\n<使用しているブラウザが未実装の機能があり、正常に動作できません。>\n/ＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶＶ\\");
+          }
+          document.getElementsByName("newpro")[0].addEventListener("click", async (e)=>{
+            await this.createProject();
+          });
+          document.getElementsByName("import")[0].addEventListener("click", async (e)=>{
+            if (this.dir == undefined) {
+              await Prompts.showError("先に新規プロジェクトを作成またはプロジェクトを読み込んでね。");
+              return;
+            }
+            let fileHandles = [];
+            if (showOpenFilePicker) {
+              fileHandles = await showOpenFilePicker({multiple:true});
+            } else {
+            }
+            let result = [];
+            for (let fileHandle of fileHandles) {
+              let file = await fileHandle.getFile();
+              let cls = await this.tree.getSourceClass(file) || SourceBase;
+              let material = await this.getMaterial(fileHandle);
+              result.push(await cls.getSourceFromFileHandle(material.fileHandle));
+            }
+            console.log(result);
+            for (let src of result) {
+              document.querySelector("body > div > div.area.below > div > ul.layers > li-layer").appendChild(src.sourceElement);
+              this.pushSrcAt(0, -1, src);
+            }
+          });
+          setTimeout(async()=>{
+            await this.handleTimelineWidth();
+            await this.handleTimelineScroll();
+          }, 0);
+          window.addEventListener("beforeunload", (e)=>{e.preventDefault();e.returnValue="";});
+          document.getElementsByName("newpro")[0].addEventListener("click", async (e)=>{await this.createProject();});
+          document.getElementsByName("savepro")[0].addEventListener("click", async (e)=>{await this.saveProject();});
+          document.getElementsByName("openpro")[0].addEventListener("click", async (e)=>{await this.loadProject();});
+          document.getElementsByName("create-text")[0].addEventListener("click", async (e)=>{this.createText("テキスト");});
+          document.getElementsByName("play-preview")[0].addEventListener("click", async (e)=>{await this.playPreview();});
+          document.getElementsByName("stop-preview")[0].addEventListener("click", async (e)=>{await this.stopPreview();});
+          new ResizeObserver(()=>{document.getElementById("dynamic").sheet.rules[1].style.setProperty("--unit-px", document.querySelector(".preview").clientWidth / this.size.width);}).observe(document.querySelector(".preview"));
+          window.addEventListener("keydown", (e)=>{return this.handleKeyState(e);});
+          window.addEventListener("keyup", (e)=>{return this.handleKeyState(e);});
+          document.querySelector(".timeline").addEventListener("scroll", async (e)=>{await this.handleTimelineScroll(e);});
+          document.querySelector(".timeline").addEventListener("scroll", (e)=>{console.log("scrollstart");this.pinchDelta={x:0, y:0, z:0};if (this.__scrollTimeout >= 0) {clearTimeout(this.__scrollTimeout);this.__ScrollTimeout = -1;}this.scrolling = true;this.__scrollTimeout = setTimeout(()=>{this.scrolling = false;this.__scrollTimeout = -1;}, 200);});
+          document.querySelector(".timeline").addEventListener("scrollend", (e)=>{console.log("scrollend");this.scrolling = false;});
+          //document.querySelector(".layers > input[name=\"time\"]").addEventListener("change", async (e)=>{if (Math.random() > 0.5) {await this.handleSeek(e);}});
+          document.querySelector(".layers > input[name=\"time\"]").addEventListener("input", async (e)=>{await this.handleSeek(e);});
+          document.querySelector("input[type=\"range\"][name=\"time\"]").addEventListener("mousedown", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector("input[type=\"range\"][name=\"time\"]").addEventListener("touchstart", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector("input[type=\"range\"][name=\"time\"]").addEventListener("mouseover", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers > div.wrapper").addEventListener("mousedown", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers > div.wrapper").addEventListener("touchstart", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers > div.wrapper").addEventListener("mouseover", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("pointerdown", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("pointermove", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("pointerup", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("pointerout", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("pointerover", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("pointercancel", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector(".layers").addEventListener("wheel", (e)=>{return this.handleSequencePointerEvent(e);});
+          document.querySelector("pop-up#encode form").addEventListener("submit", (e)=>{
+            let options = {
+              format: e.target.format.value,
+              codecs:{
+                audio: e.target.acodec.value,
+                video: e.target.vcodec.value
+              },
+            };
+            this.encode(options);
+          });
+        }
+
+        createText(text="Text here...") {
+          let src = new TextSource(text);
+          this.pushSrcAt(0, -1, src);
+          document.querySelector("li-layer[index=\"0\"]").appendChild(src.sourceElement);
+        }
+
+        pushSrcAt(layer, index, src) {
+          layer = Math.floor(layer);
+          index = Math.min(Math.floor(index), this.layers[layer].length);
+          this.layers[layer].splice(index, 0, src);
+          let dummy = this.layers[layer].filter((target, i)=>target!=src||i==index);
+          dummy.sort((a, b)=>a.options[0].frames[0]-b.options[0].frames[0]);
+          let dummyIndex = dummy.indexOf(src);
+          for (let i = Math.max(0, dummyIndex); i < dummy.length; i++) {
+            if (i > 0) {
+              let delay = dummy[i].options[0].frames[0] - dummy[i-1].options.at(-1).frames[1];
+              console.log(delay)
+              if (delay < 0) {
+                for (let option of dummy[i].options) {
+                  option.frames = option.frames.map((i)=>i-delay);
+                }
+              } else if (i > dummyIndex) {
+                break;
+              }
+            }
+          }
+          if (this.layers.at(-1).length > 0) {
+            this.layers.push([]);
+            let el = document.createElement("li-layer");
+            el.setAttribute("index", layer+1);
+            document.querySelector(".layers").appendChild(el);
+          }
+        }
+
+        removeSrcAt(layer, index) {
+          layer = Math.floor(layer);
+          index = Math.floor(index);
+          let result = this.layers[layer].splice(index, 1)[0];
+          for (let i=this.layers.length-1; i > 0; i--) {
+            if (this.layers[i].length == 0 && this.layers[i-1].length == 0) {
+              this.layers.splice(i, 1);
+              document.querySelector("li-layer[index=\""+i+"\"").remove();
+            } else {
+              break;
+            }
+          }
+        }
+
+        async getMaterial(fileHandle) {
+          let path = (await this.dir.resolve(fileHandle)).join("/");
+          let material = this.materials.find((material)=>{
+            return material.path == path;
+          });
+          if (material == undefined) {
+            material = new Material(fileHandle, path);
+            this.materials.push(material);
+          }
+          return material;
+        }
+
+        handleTimelineWidth() {
+          let timelineWidth = Math.max(...this.layers.map((layer)=>Math.max(...layer.map((src)=>Math.max(...src.options.map((option)=>option.frames[1]))))), 
+            (document.querySelector(".timeline").clientWidth - document.querySelector(".layer-tips").clientWidth) * 1000 / this.timeScale
+          );
+          document.querySelector(".layers").style.width = "calc(var(--unit-length) * " + timelineWidth + " / 1000)";
+          document.querySelector("input[name=\"time\"]").setAttribute("max", timelineWidth);
+          this.timelineWidth = timelineWidth;
+          return timelineWidth;
+        }
+
+        async handleSeek(e) {
+          let wasPlaying = this.playing;
+          let curFrame = parseInt(document.querySelector(".layers > input[name=\"time\"]").value);
+          if (this.playing) {
+            await this.stopPreview();
+            await waitUntil(this, "play-stop");
+          }
+          let els = [];
+          for (let layer of this.layers) {
+            for (let src of layer) {
+              if (src.options[0].frames[0] <= curFrame && src.options.at(-1).frames[1] >= curFrame) {
+                els.push(src.previewElement);
+                if (src.type == SOURCE_TYPES.VIDEO || src.type == SOURCE_TYPES.AUDIO) {
+                  src.previewElement.currentTime = (src.options[0].span[0] + (curFrame - src.options[0].frames[0]) / src.options[0].timeScale) / (this.fps.video * 1000);
+                }
+                src.options.forEach((option)=>Object.keys(option.__option).forEach((key)=>{if(OptionValue.prototype.isPrototypeOf(option.__option[key])){option.__option[key].time = (curFrame * 1000 - src.options[0].frames[0])/(src.options[0].frames[1]-src.options[0].frames[0]);option[key]=option.__option[key];}}))
+              }
+            }
+          }
+          document.querySelector(".preview").replaceChildren(...els);
+          if (wasPlaying) {
+            await this.playPreview(curFrame);
+          }
+        }
+
+        handleSequencePointerEvent(e) {
+          if (e.type == "mousedown" || e.type == "touchstart") {
+            let els;
+            if (e.type == "mousedown") {
+              els = document.elementsFromPoint(e.x, e.y);
+            } else {
+              if (e.touches.length > 1) {
+                els = [];
+              } else {
+                els = document.elementsFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+              }
+            }
+            console.log(e);
+            let src;
+            if (els.some((el)=>{
+              if (el.tagName == "SRC-OBJ") {
+                el.click();
+                src = el;
+                return true;
+              } else {
+                return false;
+              }
+            })) {
+              try {
+                e.preventDefault();
+              } catch {}
+              let aborter = new AbortController();
+              let pos = src.getBoundingClientRect();
+              let ppos = src.offsetParent.getBoundingClientRect();
+              console.log([pos, ppos]);
+              let offset;
+              if (e.type == "mousedown") {
+                offset = {top: ppos.y + e.y - pos.y, left: ppos.x + e.x - pos.x};
+              } else {
+                offset = {top: ppos.y + e.touches[0].clientY - pos.y, left: ppos.x + e.touches[0].clientX - pos.x};
+              }
+              console.log(offset);
+              src.style.top = src.offsetTop + "px";
+              src.style.left = src.offsetLeft + "px";
+              src.style.position = "absolute";
+              src.style.zIndex = 15;
+              let prevIndex = [...src.parentElement.children].indexOf(src);
+              let prevLayer = new Number(src.parentElement.getAttribute("index"));
+              let canMove = true;
+              let left = src.offsetLeft;
+              let timelineWidth = this.handleTimelineWidth();
+              let callback = (ev)=>{
+                let top;
+                if (ev.type == "mousemove") {
+                  top = (ev.y - offset.top);
+                  left = (ev.x - offset.left);
+                } else {
+                  top = (ev.touches[0].clientY - offset.top);
+                  left = (ev.touches[0].clientX - offset.left);
+                }
+                let layer = Math.round(prevLayer + src.offsetTop/src.parentElement.clientHeight);
+                src.style.top = top + "px";
+                src.style.left = left + "px";
+                //console.log([left, pos.left, ppos.left]);
+                document.querySelector(".layers").style.minWidth = "calc(var(--unit-length) * " + (Math.max(timelineWidth, (left + pos.width) * 1000, (pos.left - ppos.left + pos.width) * 1000) / this.timeScale) + " / 1000)";
+                if (ev.buttons == 0) {
+                  aborter.abort();
+                }
+                ;
+              };
+              window.addEventListener("mousemove", callback, {signal: aborter.signal});
+              window.addEventListener("touchmove", callback, {signal: aborter.signal});
+              let leave = ()=>{
+                aborter.abort();
+                let curLayer = Math.min(this.layers.length-1, Math.max(0, Math.round(prevLayer + src.offsetTop/src.parentElement.clientHeight)));
+                let curIndex = this.layers[curLayer].filter((src, index)=>index!=prevIndex).map((src)=>src.options[0].frames[0]).findIndex((frame)=>frame > left * 1000 / this.timeScale);
+                if (curIndex == -1) {
+                  curIndex = this.layers[curLayer].length; // - (curLayer == prevLayer);
+                } else {
+                  curIndex = Math.max(0, curIndex - 1);
+                }
+                let leftDiff = Math.max(0, Math.round(left * 1000 / this.timeScale)) - this.layers[prevLayer][prevIndex].options[0].frames[0];
+                console.log(leftDiff);
+                if (left>=1.5 || left <= -1.5) {
+                  for (let option of this.layers[prevLayer][prevIndex].options) {
+                    option.frames = [option.frames[0] + leftDiff, option.frames[1] + leftDiff];
+                  }
+                }
+                src.style.zIndex = "";
+                src.style.top = "";
+                src.style.left = "calc(var(--unit-length) * "+this.layers[prevLayer][prevIndex].options[0].frames[0]+" / 1000)";
+                console.log(src);
+                let source = this.layers[prevLayer][prevIndex];
+                if (curLayer != prevLayer) {
+                  src.remove();
+                }
+                this.pushSrcAt(curLayer, curIndex, source);
+                this.removeSrcAt(prevLayer, prevIndex+(curLayer==prevLayer&&curIndex < prevIndex));
+                let layer = document.querySelector("li-layer[index=\""+curLayer+"\"]");
+                layer.replaceChildren(...this.layers[curLayer].map((src)=>src.sourceElement));
+                this.handleTimelineWidth();
+              };
+              window.addEventListener("mouseup", leave, {signal: aborter.signal});
+              window.addEventListener("touchend", leave, {signal: aborter.signal});
+            } else {
+              ;
+            }
+          } else if (e.type == "pointerdown") {
+            if (!this.__points.some((ev)=>ev.pointerId == e.pointerId)) {
+              this.__points.push(e);
+              if (this.__points.length == 2) {
+                e.preventDefault();
+                this.__points.prevDiff = (Math.abs(this.__points[1].clientX - this.__points[0].clientX)**2 + Math.abs(this.__points[1].clientY - this.__points[0].clientY)**2) ** 0.5;
+              }
+            }
+          } else if (e.type == "pointermove") {
+            if (this.__points.length == 2) {
+              //console.log(e);
+              e.preventDefault();
+              let index = this.__points.findIndex((ev)=>ev.pointerId == e.pointerId);
+              this.__points[index] = e;
+              let curDiff = (Math.abs(this.__points[1].clientX - this.__points[0].clientX)**2 + Math.abs(this.__points[1].clientY - this.__points[0].clientY)**2) ** 0.5;
+              this.changeTimeScale(curDiff - this.__points.prevDiff);
+              this.__points.prevDiff = curDiff;
+            }
+          } else if (["pointerup", "pointerleave", "pointerout", "pointercancel"].includes(e.type)) {
+            if (this.__points.some((ev)=>ev.pointerId == e.pointerId)) {
+              this.__points = this.__points.filter((ev)=>ev.pointerId!=e.pointerId);
+            }
+          } else if (e.type == "wheel") {
+            if (this.__scrollTimeout >= 0) {
+              clearTimeout(this.__scrollTimeout);
+              this.__scrollTimeout = setTimeout(()=>{this.scrolling = false;this.__scrollTimeout = -1;this.pinchDelta={x:0, y:0, z:0};}, 200);
+            } else if (e.ctrlKey && !this.scrolling) {
+              e.preventDefault();
+              if (this.__pinchTimeout) {
+                clearTimeout(this.__pinchTimeout);
+              }
+              this.pinchDelta.x += e.deltaX;
+              this.pinchDelta.y += e.deltaY;
+              this.pinchDelta.z += e.deltaZ;
+              this.changeTimeScale((1 - (this.pinchDelta.x + this.pinchDelta.y > 0) * 2)*(this.pinchDelta.x ** 2 + this.pinchDelta.y ** 2) ** 0.5);
+              this.pinchDelta = {x:0, y:0, z:0};
+              this.__pinchTimeout = setTimeout(()=>{
+                delete this.__pinchTimeout;
+                this.pinchDelta = {x:0, y:0, z:0};
+              }, 150);
+            }
+          }
+        }
+        changeTimeScale(value, center=0) {
+          this.timeScale = Math.min(this.timeScale * (10 ** (value / 500)), 1000);
+          document.getElementById("dynamic").sheet.rules[0].style.cssText = "--unit-length: " + this.timeScale + "px;";
+          this.handleTimelineWidth();
+          this.handleTimelineScroll();
+        }
+        async handleKeyState(e) {
+          this.ctrlKey = e.ctrlKey;
+        }
+
+        async handleTimelineScroll(e) {
+          let seq = document.querySelector(".sequence-scale");
+          let unitWidth = this.timeScale * this.fps.video * (2**(Math.ceil(Math.log2((this.timeScale)))-1)) * (2**Math.ceil(Math.log2((document.querySelector(".timeline").clientWidth - document.querySelector(".layer-tips").clientWidth) / (4*this.fps.video))-1));
+          let redraw = (unitWidth != this.__timelineUnitWidth);
+          if (redraw) {
+            this.__timelineUnitWidth = unitWidth;
+          }
+
+          document.getElementById("dynamic").sheet.rules[2].style.cssText = "--scale-length: " + unitWidth + "px";
+          let scrollLeft = document.querySelector(".timeline").scrollLeft;
+          let many = 4 + Math.ceil((document.querySelector(".timeline").clientWidth - document.querySelector(".layer-tips").clientWidth) / unitWidth);
+          let secPerScale = unitWidth / (this.timeScale * this.fps.video);
+
+          function unitText(index) {
+            let time = new TimeDelta(secPerScale*index);
+            if (time.hour == 0) {
+              if (time.minute == 0) {
+                return time.second.toString()+"."+time.millisecond.toString().padStart(3, "0");
+              } else {
+                return time.minute.toString()+":"+time.second.toString().padStart(2, "0")+"."+time.millisecond.toString().padStart(3, "0");
+              }
+            } else {
+              return time.hour.toString()+":"+time.minute.toString().padStart(2, "0")+":"+time.second.toString().padStart(2, "0")+"."+time.millisecond.toString().padStart(3, "0");
+            }
+          }
+
+          let lefts = [];
+          let rights = [];
+          if (unitWidth*(this.seqUnitIndex+0) - scrollLeft > 0 || (seq.children.length != many && unitWidth*this.seqUnitIndex - scrollLeft >= 0)) {
+            for (let i = 0; i < many - seq.children.length; i++) {
+              let el = document.createElement("span");
+              el.innerText = unitText(this.seqUnitIndex+many-i-1);
+              lefts.push(el);
+            }
+            for (let i = 1; i < seq.children.length - many + 1 - lefts.length; i++) {
+              rights.push(seq.children.length-i);
+            }
+            for (let i = many - seq.children.length + 1; i < many - seq.children.length + Math.ceil(this.seqUnitIndex + 2 - scrollLeft/unitWidth) && this.seqUnitIndex >= i; i++) {
+              if (many+lefts.length-i < 0) {break;}
+              if (unitWidth*(this.seqUnitIndex+1+lefts.length) >= this.timelineWidth) {break;}
+              let el = document.createElement("span");
+              el.innerText=unitText(this.seqUnitIndex-i);
+              lefts.push(el);
+              rights.push(seq.children.length-i);
+            }
+            for (let i of lefts) {
+              seq.insertAdjacentElement("afterbegin", i);
+            }
+            for (let i of rights.slice(0, Math.max(0, rights.length + seq.children.length - many))) {
+              try {
+                seq.children[lefts.length+i].remove();
+              } catch(e) {}
+            }
+            this.seqUnitIndex -= rights.length;
+            seq.style.paddingLeft = "calc(var(--scale-length) * " + this.seqUnitIndex + ")";
+          }
+          lefts = [];
+          rights = [];
+          if (unitWidth*(this.seqUnitIndex) - scrollLeft < 0 || (seq.children.length != many && unitWidth*this.seqUnitIndex - scrollLeft <= 0)) {
+            for (let i = many-seq.children.length; i > 0; i--) {
+              let el = document.createElement("span");
+              el.innerText = unitText(this.seqUnitIndex + many + i);
+              rights.push(el);
+            }
+            for (let i = 0; i < seq.children.length - many - rights.length; i++) {
+              lefts.push(i);
+            }
+            for (let i = many - seq.children.length; i < many - seq.children.length + Math.ceil(scrollLeft/unitWidth - this.seqUnitIndex - 2) && this.seqUnitIndex >= i; i++) {
+              if (i >= many+rights.length) {break;}
+              if (unitWidth*(this.seqUnitIndex+1-rights.length) <= 0) {break;}
+              lefts.push(i);
+              let el = document.createElement("span");
+              el.innerText = unitText(this.seqUnitIndex + many + i);
+              rights.push(el);
+            }
+            if (lefts.length >= seq.children.length) {
+              seq.replaceChildren(...rights.slice(-1*many));
+            } else {
+              lefts = lefts.reverse();
+              for (let i of rights) {
+                seq.insertAdjacentElement("beforeend", i);
+              }
+              for (let i of lefts.slice(0, Math.max(0, lefts.length + seq.children.length - many))) {
+                try {
+                  seq.children[i].remove();
+                } catch {}
+              }
+            }
+            this.seqUnitIndex += lefts.length;
+            seq.style.paddingLeft = "calc(var(--scale-length) * " + this.seqUnitIndex + ")";
+          }
+        }
+
+        async playPreview(start, end) {
+          if (this.playing) {
+            this.stopPreview();
+            return;
+          }
+          this.playing = true;
+          if (start) {
+            document.querySelector(".preview").replaceChildren();
+          }
+          let timings = [];
+          let prevFrame = 0;
+          let playingFrame = start!=undefined?start-1:parseInt(document.querySelector(".layers > input[name=\"time\"]").value);
+          let layerIndex = 0;
+          for (let layer of this.layers) {
+            let timing = [];
+            for (let src of layer) {
+              if (src.previewElement) {
+                console.log(src.previewElement);
+                src.previewElement.style.zIndex = layerIndex+1;
+              }
+              let callbacks = {start:async (src)=>{}, end:async (src)=>{}, pause:async (src)=>{}};
+              for (let effect of src.options[0].effects) {
+                effect.preparePreview(src.previewElement, src.options[0]);
+              }
+              if (src.type == SOURCE_TYPES.VIDEO || src.type == SOURCE_TYPES.AUDIO) {
+                //src.previewElement.playbackRate /= 4;
+                callbacks.start = async (src, frame)=>{
+                  src.previewElement.currentTime = ((src.options[0].span[0] + frame / src.options[0].timeScale) / this.fps.video) / 1000;
+                  await Promise.all(src.options[0].effects.map((effect)=>effect.playPreview()));
+                  document.querySelector(".preview").appendChild(src.previewElement);
+                  src.previewElement.play();
+                  //window.addEventListener("pointermove", (e)=>{try{src.previewElement.removeAttribute("muted");}catch{}}, {passive:true, once:true});
+                };
+                callbacks.end = async (src)=>{
+                  src.previewElement.pause();
+                  src.previewElement.remove();
+                  await Promise.all(src.options[0].effects.map((effect)=>effect.stopPreview()));
+                };
+                callbacks.pause = async (src)=>{
+                  src.previewElement.pause();
+                  await Promise.all(src.options[0].effects.map((effect)=>effect.pausePreview()));
+                }
+              } else {
+                callbacks.start = async (src)=>{
+                  await Promise.all(src.options[0].effects.map((effect)=>effect.playPreview()));
+                  document.querySelector(".preview").appendChild(src.previewElement);
+                };
+                callbacks.end = async (src)=>{
+                  src.previewElement.remove();
+                  await Promise.all(src.options[0].effects.map((effect)=>effect.stopPreview()));
+                };
+                callbacks.pause = async (src)=>{
+                  await Promise.all(src.options[0].effects.map((effect)=>effect.pausePreview()));
+                }
+              }
+              timing.push([...src.options[0].frames, callbacks, src]);
+            }
+            timings.push(timing);
+            layerIndex += 1;
+          }
+          console.log(timings);
+          let lastFrame = end!=undefined?end:Math.max(0, ...timings.map((timing)=>Math.max(0, ...timing.map((i)=>i[1]))));
+          if (lastFrame < playingFrame) {
+            playingFrame = 0;
+          }
+          console.log(lastFrame)
+          let playingId = [];
+          let startTime = Date.now() - (playingFrame / this.fps.video);
+          let interval = setInterval(async ()=>{
+            let curTime = Date.now();
+            let curFrame = Math.round((curTime - startTime) * this.fps.video); // fps * ms
+            //console.log([playingFrame, curFrame]);
+            for (let timing of timings) {
+              timing.filter((i)=>playingId.includes(i[3].id)&&i[1]<curFrame).forEach(async (i)=>{
+                console.log("end  :", playingFrame+" - "+curFrame, i);
+                await i[2].end(i[3]);
+                playingId.slice(playingId.findIndex((id)=>id==i[3].id), 1);
+              });
+              timing.filter((i)=>i[0]<=curFrame&&curFrame<i[1]).forEach(async (i)=>{
+                if (!playingId.includes(i[3].id)) {
+                  console.log("start  :", playingFrame+" - "+curFrame, i);
+                  await i[2].start(i[3], curFrame-i[0]);
+                  playingId.push(i[3].id);
+                }
+                i[3].options.forEach((option)=>Object.keys(option.__option).forEach((key)=>{if(OptionValue.prototype.isPrototypeOf(option.__option[key])){option.__option[key].time = (curFrame-i[0])/(i[1]-i[0]);option[key]=option.__option[key];}}));
+              });
+            }
+            if (this.playing) {
+              document.querySelector(".layers > input[name=\"time\"]").value = curFrame;
+            }
+            if (curFrame > lastFrame || !this.playing) {
+              if (this.playing) {
+                document.querySelector(".layers > input[name=\"time\"]").value = Math.min(lastFrame+1, curFrame);
+              }
+              try {
+                clearInterval(interval);
+              } catch {}
+              for (let timing of timings) {
+                await Promise.all(timing.filter((i)=>i[0]<=curFrame&&i[1]>=curFrame).map((i)=>i[2].pause(i[3])));
+              }
+              this.playing = false;
+              this.dispatchEvent(new Event("play-stop"));
+              return;
+            }
+            prevFrame = playingFrame;
+            playingFrame = curFrame;
+          }, 10);
+          startTime = Date.now() - (playingFrame / this.fps.video);
+        }
+
+        async stopPreview() {
+          this.playing = false;
+        }
+
+        async saveProject() {
+          if (!this.dir) {
+            this.dir = await showDirectoryPicker({mode:"readwrite"});
+          }
+          if (!await Prompts.askOk("プロジェクトを保存します。上書きされる可能性ありです。\n\n本 当 に よ ろ し い で す か ？")) {
+            await Prompts.showError("ちぇっ");
+            return;
+          }
+          let data = {
+            version: VERSION,
+            name: "",
+            fps: this.fps,
+            size: this.size,
+            layers: this.layers.filter((layer=>layer.length>0)).map((layer)=>{
+              return layer.map((src)=>{
+                let srcData = {};
+                if (File.prototype.isPrototypeOf(src.file)) {
+                  srcData.path = src.path;
+                }
+                srcData.type = src.type;
+                srcData.options = src.options.map((option)=>option.__option);
+                return srcData;
+              });
+            })
+          };
+          let fileHandle = await this.dir.getFileHandle("meta.json");
+          let writable = await fileHandle.createWritable();
+          await writable.write(JSON.stringify(data, (key, value)=>{
+            if (OptionValue.prototype.isPrototypeOf(value)) {
+              return {begin:value.begin, end:value.end, type:value.type, as:"OptionValue"};
+            } else {
+              return value;
+            }
+          }));
+          await writable.close();
+          await Prompts.showInfo("保存が完了しました。");
+        }
+
+        async loadProject() {
+          this.dir = await showDirectoryPicker({mode:"readwrite"});
+          let fileHandle;
+          try {
+            fileHandle = await this.dir.getFileHandle("meta.json", {create:true});
+          } catch {
+            await Prompts.showError("meta.jsonが見つかりませんでした。veditで作成されたプロジェクトディレクトリを選択してね。")
+            return;
+          }
+          let popup = document.querySelector("pop-up#loading");
+          let progress = document.createElement("progress");
+          progress.style.width = "50vw";
+          progress.style.minWidth = "100%";
+          popup.body.insertAdjacentElement("afterbegin", progress);
+          popup.body.insertAdjacentHTML("afterbegin",
+            '<svg viewBox="0 0 256 256" width="256px" height="256px" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com"><defs></defs><path style="fill: rgb(0, 106, 255);" d="M 120 0 C 120 66.274 66.274 120 0 120 C -66.274 120 -120 66.274 -120 0 C -120 -21.861 -114.154 -42.357 -103.94 -60.01 L -83.152 -48.008 C -91.323 -33.886 -96 -17.489 -96 0 C -96 53.019 -53.019 96 0 96 C 53.019 96 96 53.019 96 0 C 96 -53.019 53.019 -96 0 -96 L 0 -120 C 66.274 -120 120 -66.274 120 0 Z" transform="translate(128, 128)"><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" additive="sum" type="rotate" from="0" to="360"></animateTransform></path><path style="fill: rgb(0, 187, 255);" d="M 0.007 80 C -14.567 80 -28.231 76.103 -40 69.294 L -31.998 55.435 C -22.584 60.882 -11.652 64 0.007 64 C 35.353 64 64.007 35.346 64.007 0 L 80.007 0 C 80.007 44.183 44.19 80 0.007 80 Z" bx:origin="0.333372 0" transform="translate(128, 128)"><animateTransform attributeName="transform" dur="1.25s" repeatCount="indefinite" additive="sum" type="rotate" from="360" to="0"></animateTransform></path><path d="M 48.001 0 C 48.001 26.51 26.511 48 0.001 48 C -26.51 48 -48 26.51 -48 0 C -48 -17.765 -38.349 -33.276 -24.004 -41.576 L -8.001 -13.859 C -12.783 -11.092 -16 -5.922 -16 0 C -16 8.837 -8.837 16 0.001 16 C 8.838 16 16.001 8.837 16.001 0 C 16.001 -7.405 10.972 -13.634 4.143 -15.459 L 12.427 -46.376 C 32.914 -40.901 48.001 -22.213 48.001 0 Z" style="fill: rgb(0, 140, 255);" transform="translate(128, 128)" bx:origin="0.500001 0.491407"><animateTransform attributeName="transform" dur="2s" repeatCount="indefinite" additive="sum" type="rotate" from="0" to="360"></animateTransform></path></svg>'
+          );
+          let svg = popup.body.children[0];
+          popup.activate();
+          try {
+            let data;
+            try {
+              data = JSON.parse(await (await fileHandle.getFile()).text(), (key, value)=>{
+                if (Object.isPrototypeOf(value) && value.as == "OptionValue") {
+                  return new OptionValue(value);
+                } else {
+                  return value;
+                }
+              });
+            } catch {
+              throw "meta.jsonが破損しているか、veditのものではありません。";
+            }
+            console.log(data);
+            if (data.version != VERSION) {
+              throw "バージョンが違うため読み込めません。残念だったな。";
+            }
+            this.fps = data.fps;
+            this.size = data.size;
+            let layerIndex = 0;
+            let handles = [];
+            let size = 0;
+            for (let layer of data.layers) {
+              handles.push([]);
+              for (let index = 0; index < layer.length; index++) {
+                let dir = this.dir;
+                let fileHandle;
+                if (layer[index].path) {
+                  let parsedPath = layer[index].path.match(/(?:(?:\\\/)|[^\/])+/g);
+                  for (let name of parsedPath.slice(0, -1)) {
+                    dir = await dir.getDirectoryHandle(name);
+                  }
+                  fileHandle = await dir.getFileHandle(parsedPath.at(-1));
+                  let material = await this.getMaterial(fileHandle);
+                }
+                let cls = this.tree.getSourceClassFromType(layer[index].type) || SourceBase;
+                let file;
+                if (fileHandle) {
+                  file = await fileHandle.getFile();
+                  size += file.size;
+                }
+                handles.at(-1).push([cls, fileHandle, file?file.size:0]);
+              }
+              layerIndex += 1;
+            }
+            progress.max = size;
+            progress.min = 0;
+            progress.value = 0;
+            layerIndex = 0;
+            for (let layer of data.layers) {
+              for (let index = 0; index < layer.length; index++) {
+                let src;
+                let [cls, fileHandle, fileSize] = handles[layerIndex][index];
+                if (layer[index].type != SOURCE_TYPES.TEXT) {
+                  src = await cls.getSourceFromFileHandle(fileHandle);
+                } else {
+                  src = new cls("");
+                }
+                let optionIndex = 0;
+                for (let option of layer[index].options) {
+                  if (src.options.length < optionIndex+1) {
+                    continue;
+                  }
+                  try {
+                    src.options[optionIndex].span = option.span;
+                  } catch {}
+                  for (let key of Object.keys(option)) {
+                    if (["span", "timeScale"].includes(key)) {continue;}
+                    try {
+                      if (option.as == "OptionValue" || OptionValue.prototype.isPrototypeOf(src.options[optionIndex][key])) {
+                        src.options[optionIndex][key] = new OptionValue(option[key]);
+                      } else {
+                        src.options[optionIndex][key] = option[key];
+                      }
+                    } catch {}
+                  }
+                  optionIndex += 1;
+                }
+                this.pushSrcAt(layerIndex, index, src);
+                document.querySelector("li-layer[index=\""+layerIndex+"\"]").appendChild(src.sourceElement);
+                progress.value += fileSize;
+              }
+              layerIndex += 1;
+            }
+            let lastFrame = Math.max(0, ...this.layers.map((layer)=>Math.max(0, ...layer.map((src)=>src.options.at(-1).frames[1]))));
+            this.timeScale = this.timelineWidth / (this.timeScale * lastFrame);
+            this.handleTimelineScroll();
+            this.handleTimelineWidth();
+            this.handleSeek();
+          } catch(e) {
+            await Prompts.showError(e);
+          }
+          progress.remove();
+          svg.remove();
+          popup.close();
+        }
+
+        async createProject() {
+          this.dir = await showDirectoryPicker({mode:"readwrite"});
+          if (!await Prompts.askOk("続行すると、"+this.dir.name+"に\n含まれるすべてのファイルがveditによって覗けたりいじったり出来るようになります。あと「meta.json」があれば上書きされます。\n\n本 当 に よ ろ し い で す ね ？ (^^)")) {
+            await Prompts.showError("ﾌｰﾝ...(・|");
+            return;
+          }
+          let fileHandle = await this.dir.getFileHandle("meta.json", {create:true});
+          let data = {
+            version: VERSION,
+            name: "",
+            fps: this.fps,
+            size: this.size,
+            layers: []
+          };
+          let writable = await fileHandle.createWritable();
+          await writable.write(JSON.stringify(data, (key, value)=>{
+            if (OptionValue.prototype.isPrototypeOf(value)) {
+              return {begin:value.begin, end:value.end, type:value.type, as:"OptionValue"};
+            } else {
+              return value;
+            }
+          }));
+          await writable.close()
+          await Prompts.showInfo("たぶん作ったぞ");
+        }
+
+        async encode(options={}) {
+          const {format="mp4", codecs={audio:"aac", video:"avc1"}} = options;
+          this.ms = Math.max(...this.layers.map((layer)=>Math.max(...layer.map((src)=>src.options.at(-1).frames[1])))) / this.fps.video;
+          let ctx = new OfflineAudioContext({
+            numberOfChannels: this.isStereo,
+            length: Math.ceil(this.sampleRate * this.ms / 1000),
+            sampleRate: this.sampleRate
+          });
+          let workspace = document.createElement("svg");
+          let promises = [];
+          for (let layer of this.layers) {
+            for (let src of layer) {
+              if (AudioSource.prototype.isPrototypeOf(src)) {
+                promises.push(src.decodeReady(ctx));
+              } else {
+                promises.push(src.decodeReady());
+              }
+            }
+          }
+          await Promise.all(promises);
+          console.log(promises);
+          let timings = [];
+          let handlingSources = new Map();
+          for (let layer of this.layers) {
+            let timing = [];
+            for (let src of layer) {
+              timing.push([...src.options[0].frames, src]);
+            }
+            timings.push(timing);
+          }
+          console.log(timings);
+          let curFrame = 0;
+          while (this.ms > curFrame * 1000 / this.fps.video && curFrame < 3) {
+            let monitor = new Uint32Array(this.size.width * this.size.height);
+            for (let timing of timings) {
+              timing.filter((i)=>(curFrame-1)*1000<i[0]&&i[0]<=curFrame*1000).forEach((i)=>{
+                console.log("start:", curFrame, i);
+                handlingSources.set(i[2].id, i[2]);
+              });
+              timing.filter((i)=>(curFrame-1)*1000<i[1]&&i[1]<=curFrame*1000).forEach((i)=>{
+                console.log("end  :", curFrame, i);
+                handlingSources.delete(i[2].id);
+              });
+            }
+            for (let src of handlingSources.values()) {
+              src.options.forEach((option)=>Object.keys(option.__option).forEach((key)=>{if(OptionValue.prototype.isPrototypeOf(option.__option[key])){option.__option[key].time = (curFrame * 1000 - src.options[0].frames[0])/(src.options[0].frames[1]-src.options[0].frames[0]);option[key]=option.__option[key];}}))
+              let data = await src.getFrame(curFrame - Math.round(src.options[0].frames[0] / 1000));
+              console.log(data);
+              if (VideoFrame.prototype.isPrototypeOf(data)) {
+                let rect = {
+                  width: src.options[0].width.curValue,
+                };
+                let temp;
+                let [Y, U, V] = [];
+                switch (data.format) {
+                  case "RGBA":
+                  case "RGBX":
+                    temp = new Uint32Array(data.displayWidth * data.displayHeight);
+                    await data.copyTo(temp);
+                    break;
+                  case "BGRA":
+                  case "BGRX":
+                    temp = new Uint32Array(data.displayWidth * data.displayHeight);
+                    await data.copyTo(temp);
+                    temp.forEach((value, index, array)=>{
+                      array[index] = ((0xff000000 & value) | ((value & 0xff0000) >>> 16)
+                        | (0xff00 & value)
+                        | ((0xff & value) << 16)) >>> 0;
+                    });
+                    break;
+                  case "I420":
+                    temp = new Uint8Array(data.allocationSize());
+                    [Y, U, V] = await data.copyTo(temp);
+                    console.log([Y,U,V]);
+                    temp = Uint32Array.from(temp.slice(Y.offset, Y.offset+Y.stride*data.displayHeight), (value, index, array)=>{
+                      let [y, cb, cr] = [value / 255, temp[U.offset+Math.floor(index/(Y.stride*2))*U.stride+Math.floor((index%Y.stride)/2)] / 255 - 0.5, temp[V.offset+Math.floor(index/(Y.stride*2))*V.stride+Math.floor((index%Y.stride)/2)] / 255 - 0.5];
+                      return (0xff000000 | (Math.max(0, (y + cb * 1.13983) * 255 >>> 0) << 16)
+                        | (Math.max(0, (y + cb * (-0.39465) + cr * (-0.58060)) * 255 >>> 0) << 8)
+                        | (Math.max(0, y + cr * 2.03211) * 255 >>> 0)) >>> 0;
+                    });
+                    break;
+                  case "I422":
+                  case "I444":
+                    break;
+                  case "I420A":
+                    temp = new Uint8Array(data.allocationSize());
+                    Y, U, V = await data.copyTo(temp)
+                    temp.forEach((value, index, array)=>{
+                      array[index] = ((0xff000000 & value) | (((0xff0000 & value) + (0xff & value) * 1.13983) >>> 0)
+                        | (((0xff0000 & value) + (0xff00 & value) * (-0.39465) + (0xff & value) * (-0.58060)) >>> 0)
+                        | (((0xff0000 & value) + (0xff00 & value) * 2.03211) >>> 0)) >>> 0;
+                    });
+                    break;
+                }
+                let displayWidth = Math.round(src.options[0].width.curValue);
+                let displayHeight = Math.round(src.options[0].height.curValue);
+                let scaleWidth = displayWidth / data.displayWidth;
+                let scaleHeight = displayHeight / data.displayHeight;
+                if (scaleWidth  != 1 || scaleHeight != 1) {
+                  temp = new Uint32Array([...(function*(w,h,oldW,oldH){for(let y=0;y<h;y++){for(let x=0;x<w;x++){
+                    let deltaX = x / scaleWidth - Math.floor(x / scaleWidth);
+                    let deltaY = y / scaleHeight - Math.floor(y / scaleHeight);
+                    if (deltaX == 0 && deltaY == 0 && false) {
+                      yield temp[Math.round((y*oldW / scaleHeight)+(x / scaleWidth))];
+                      continue;
+                    } else {
+                      let oldPos = {x:Math.floor(x / scaleWidth),y:Math.floor(y / scaleHeight)};
+                      yield [0xff, 0xff00, 0xff0000, 0xff000000].reduce((total, i)=>(total | ((((temp[oldPos.x+oldPos.y*oldW] & i) * (1-deltaX) * 0.25 + (temp[Math.min(oldPos.x+1,oldW-1)+oldPos.y*oldW] & i) * deltaX * 0.25) * (1-deltaY) +
+                        ((temp[oldPos.x+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * (1-deltaX) * 0.25 + (temp[Math.min(oldPos.x+1,oldW-1)+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * deltaX * 0.25) * deltaY) & i))>>>0, 0);
+                    }
+                  }}})(displayWidth,displayHeight, data.displayWidth, data.displayHeight)]);
+                }
+                let cosA = Math.cos((src.options[0].rotate.curValue || 0) * 2 * Math.PI / 360);
+                let sinA = Math.sin((src.options[0].rotate.curValue || 0) * 2 * Math.PI / 360);
+                let xs = [0, displayWidth * cosA - displayHeight * sinA, displayWidth * cosA,  -1*displayHeight * sinA];
+                let ys = [0, displayWidth * sinA + displayHeight * cosA, displayWidth * sinA, displayHeight * cosA];
+                let offsetX = Math.min(...xs);
+                let offsetY = Math.min(...ys);
+                let w = Math.ceil(Math.max(...xs)-offsetX);
+                let h = Math.ceil(Math.max(...ys)-offsetY);
+                let temp2 = new Uint32Array(w * h);
+                temp.forEach((value, index)=>{
+                  if (value & 0xff000000 == 0) {return;}
+                  let x = index % displayWidth;
+                  let y = (index - x) / displayWidth;
+                  let X = x * cosA - y * sinA;
+                  let Y = x * sinA + y * cosA;
+                  temp2[Math.round(X - offsetX) + Math.round(Y - offsetY) * w] = value;
+                });
+                //data.close();
+                temp2.forEach((value, index)=>{
+                  if (value & 0xff000000 == 0) {return;}
+                  let x = index % w;
+                  let y = (index - x) / w;
+                  x += offsetX;
+                  y += offsetY;
+                  if (0 <= x && x <= this.size.width - 1 && 0 <= y && y <= this.size.height - 1) {
+                    let distIndex = Math.round(x)+Math.round(y)*this.size.width;
+                    let dist = monitor[distIndex];
+                    let alpha = ((value & 0xff000000) >>> 0) / 0xff000000;
+                    monitor[distIndex] = ((Math.round((dist & 0xff) * (1 - alpha) + (value & 0xff) * alpha) & 0xff) +
+                      (Math.round((dist & 0xff00) * (1 - alpha) + (value & 0xff00) * alpha) & 0xff00) +
+                      (Math.round((dist & 0xff0000) * (1 - alpha) + (value & 0xff0000) * alpha) & 0xff0000) | 0xff000000) >>> 0;
+                  }
+                });
+              }
+            }
+            let result = new VideoFrame(monitor, {format:"RGBA", codedWidth:this.size.width, codedHeight:this.size.height, colorSpace:new VideoColorSpace(), timestamp:(curFrame/this.fps.video)*1000});
+            console.log(result);
+            curFrame += 1;
+          }
+        }
+      }
+      var main = new EditorMain();
+      [[VideoSource, SOURCE_TYPES.VIDEO],
+      [AudioSource, SOURCE_TYPES.AUDIO],
+      [ImageSource, SOURCE_TYPES.IMAGE],
+      [TextSource, SOURCE_TYPES.TEXT]].forEach((i)=>{
+        let callback = i[0].check;
+        main.tree.register(i[0], callback, i[1]);
+      });
+    </script>
+  </body>
+</html>
