@@ -2159,7 +2159,7 @@
       class VideoSource extends SourceBase {
         static SUPPORTED = ["mp4",];
         static check(file) {
-          return file.name.startsWith("video/");
+          return file.type.startsWith("video/");
         }
         constructor(file, path, arrayBuffer, format="mp4") {
           super(file, path, format, SOURCE_TYPES.VIDEO);
@@ -2669,7 +2669,8 @@
             document.createElement("p"),
             document.createElement("p")
           );
-          this.options[0].span = this.options[0].frames = [0, Math.ceil(1000 * main.fps.video)];
+          this.options[0].span = [0, Math.ceil(1000 * main.fps.video)];
+          this.options[0].frames = [...this.options[0].span];
           this.options.forEach((option)=>{
             let addition = {
               text: text,
@@ -3764,8 +3765,8 @@
                       continue;
                     } else {
                       let oldPos = {x:Math.floor(x / scaleWidth),y:Math.floor(y / scaleHeight)};
-                      yield [0xff, 0xff00, 0xff0000, 0xff000000].reduce((total, i)=>(total | ((((temp[oldPos.x+oldPos.y*oldW] & i) * (1-deltaX) * 0.25 + (temp[Math.min(oldPos.x+1,oldW-1)+oldPos.y*oldW] & i) * deltaX * 0.25) * (1-deltaY) +
-                        ((temp[oldPos.x+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * (1-deltaX) * 0.25 + (temp[Math.min(oldPos.x+1,oldW-1)+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * deltaX * 0.25) * deltaY) & i))>>>0, 0);
+                      yield [0xff, 0xff00, 0xff0000, 0xff000000].reduce((total, i)=>(total | ((((temp[oldPos.x+oldPos.y*oldW] & i) * (1-deltaX) * 0.5 + (temp[Math.min(oldPos.x+1,oldW-1)+oldPos.y*oldW] & i) * deltaX * 0.5) * (1-deltaY) +
+                        ((temp[oldPos.x+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * (1-deltaX) * 0.5 + (temp[Math.min(oldPos.x+1,oldW-1)+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * deltaX * 0.5) * deltaY) & i))>>>0, 0);
                     }
                   }}})(displayWidth,displayHeight, data.displayWidth, data.displayHeight)]);
                 }
