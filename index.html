@@ -1477,7 +1477,7 @@
           el.remove();
         });
         let img = document.createElement("img");
-        img.src = "data:image/svg+xml;charset=utf-8;base64,"+btoa(svg.outerHTML.replaceAll(/[^\x00-\x7f]+/g, (m)=>unescape(encodeURIComponent(m[0]))));
+        img.src = "data:image/svg+xml;charset=utf-8;base64,"+btoa(svg.outerHTML.replaceAll(/[^\x00-\x7f]+/g, (m)=>unescape(encodeURIComponent(m))));
         img.style.width = width + "px";
         img.style.height = height + "px";
         img.setAttribute("width", Math.round(width));
@@ -2156,6 +2156,79 @@
         }
       }
 
+      class MP4Box extends Object {
+        constructor(type) {
+          super();
+          this.type = type;
+          if (['cmov', 'ctts', 'dinf', 'edts', 'esds', 'free', 'ftyp', 'iods', 'junk', 'mdia', 'minf', 'moov', 'mvhd', 'pict', 'pnot', 'rmda', 'rmra', 'skip', 'stbl', 'trak', 'uuid', 'wide'].includes(type)) {
+            this.isParent = true;
+          } else if (['ctab', 'co64', 'dref', 'fiel', 'mdat', 'rdrf', 'rmcd', 'rmcs', 'rmdr', 'rmqu', 'rmvc', 'wfex', 'cmvd', 'co64', 'dcom', 'elst', 'gmhd', 'hdlr', 'mdhd', 'smhd', 'stco', 'stsc', 'stsd', 'stss', 'stsz', 'stts', 'tkhd', 'tname', 'udta', 'vmhd'].includes(type)) {
+            this.isParent = true;
+          } else {
+            throw "unexpected box type: " + type;
+          }
+          this.child = undefined;
+        }
+        getLength() {
+          var size;
+          if (this.child == undefined) {
+            size = 0n;
+          } else if (this.isParent && Array.prototype.isPrototypeOf(this.child) && this.child.every((ch)=>MP4Box.prototype.isPrototypeOf(ch), true)) {
+            size = this.child.reduce((total, ch)=>total+ch.getLength(), 0n);
+          } else if (Uint8Array.prototype.isPrototypeOf(this.child)) {
+            size = BigInt(this.child.length);
+          } else {
+            throw "unexpected child type: "+this.child;
+          }
+          size += 8n;
+          if (size > 0xffffffffffn) {
+            size += 8n;
+          }
+          return size;
+        }
+        getBinary() {
+          var binValue;
+          var result;
+          var size = 0;
+          if (this.child == undefined) {
+            binValue = new Uint8Array(0);
+          } else if (this.isParent && Array.prototype.isPrototypeOf(this.child) && this.child.every((ch)=>MP4Box.prototype.isPrototypeOf(ch), true)) {
+            binValue = new Uint8Array(this.child.reduce((total, ch)=>[...total, ...ch.getBinary()], []));
+          } else if (Uint8Array.prototype.isPrototypeOf(this.child)) {
+            binValue = this.child;
+          } else {
+            throw "unexpected child type: "+this.child;
+          }
+          size = BigInt(binValue.length) + 8n;
+          if (size > 0xffffffff) {
+            result.set([0, 0, 0, 1], 0);
+            result = new Uint8Array(parseInt(size + 8n));
+            result.set([
+              size >> 256n,
+              (size & 0xff000000000000n) >> 128n,
+              (size & 0xff0000000000n) >> 64n,
+              (size & 0xff00000000n) >> 32n,
+              (size & 0xff000000n) >> 24n,
+              (size & 0xff0000n) >> 16n,
+              (size & 0xff00n) >> 8n,
+              size & 0xffn
+            ].map((i)=>parseInt(i)), 8);
+            result.set(binValue, 16);
+          } else {
+            result = new Uint8Array(parseInt(size));
+            result.set([
+              size >> 24n,
+              (size & 0xff0000n) >> 16n,
+              (size & 0xff00n) >> 8n,
+              size & 0xffn
+            ].map((i)=>parseInt(i)), 0);
+            result.set(binValue, 8);
+          }
+          result.set([...this.type].map((ch)=>ch.charCodeAt(0)), 4);
+          return result;
+        }
+      }
+
       class VideoSource extends SourceBase {
         static SUPPORTED = ["mp4",];
         static check(file) {
@@ -2571,7 +2644,7 @@
 
       class ImageSource extends SourceBase {
         static check(file) {
-          return file.name.startsWith("image/");
+          return file.type.startsWith("image/");
         }
         constructor(file, path, format) {
           super(file, path, format, SOURCE_TYPES.IMAGE);
@@ -2709,6 +2782,7 @@
         calcAll() {
           let dummy = document.createElement("span");
           dummy.innerText = this.options[0].text;
+          dummy.style.whiteSpace="pre";
           dummy.style.opacity = 0;
           dummy.style.fontFamily = this.options[0].fontFamily;
           dummy.style.fontSize = this.options[0].fontSize.begin + "px";
@@ -2857,7 +2931,8 @@
         async decodeReady() {
           this.__svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
           let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          text.innerText = this.options[0].text;
+          text.textContent = this.options[0].text;
+          text.setAttribute("dominant-baseline", "text-before-edge");
           this.__svg.appendChild(text);
           this.__svg.setAttribute("viewBox", "0 0 "+this.width+" "+this.height);
           this.__svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2865,6 +2940,8 @@
         async getFrame(frame) {
           this.__svg.setAttribute("width", this.options[0].width.curValue+"px");
           this.__svg.setAttribute("height", this.options[0].height.curValue+"px");
+          this.__svg.children[0].setAttribute("fill", "#"+Math.round(this.options[0].colorR.curValue).toString(16).padStart(2, "0")+Math.round(this.options[0].colorG.curValue).toString(16).padStart(2, "0")+Math.round(this.options[0].colorB.curValue).toString(16).padStart(2, "0"));
+          this.__svg.children[0].style.fontSize = this.options[0].fontSize.curValue + "px";
           let videoFrame = await convertSVGToVideoFrame(this.__svg, {width: this.options[0].width.curValue, height: this.options[0].height.curValue});
           return videoFrame;
         }
@@ -3659,9 +3736,28 @@
         }
 
         async encode(options={}) {
-          const {format="mp4", codecs={audio:"aac", video:"avc1"}} = options;
+          this.encoderOptions = {
+            format:options.format || "mp4",
+            codecs: {
+              audio: (options.codecs || {}).audio || "aac",
+              video: (options.codecs || {}).video || "avc1"
+            }
+          };
           this.ms = Math.max(...this.layers.map((layer)=>Math.max(...layer.map((src)=>src.options.at(-1).frames[1])))) / this.fps.video;
-          let ctx = new OfflineAudioContext({
+          this.encodedVideoChunks = [];
+          this.encoder = new VideoEncoder({
+            output: (chunk, metadata)=>this.handleEncodedChunk(chunk, metadata),
+            error: console.error
+          });
+          this.encoder.configure({
+            codec:"avc1.42C029", //this.encoderOptions.codecs.video,
+            width: this.size.width,
+            height: this.size.height,
+            bitrate: 0.1*this.size.width*this.size.height*this.fps.video*12,
+            framerate: this.fps.video,
+            hardwareAcceleration: "prefer-hardware"
+          });
+          let audioCtx = new OfflineAudioContext({
             numberOfChannels: this.isStereo,
             length: Math.ceil(this.sampleRate * this.ms / 1000),
             sampleRate: this.sampleRate
@@ -3671,7 +3767,7 @@
           for (let layer of this.layers) {
             for (let src of layer) {
               if (AudioSource.prototype.isPrototypeOf(src)) {
-                promises.push(src.decodeReady(ctx));
+                promises.push(src.decodeReady(audioCtx));
               } else {
                 promises.push(src.decodeReady());
               }
@@ -3690,7 +3786,7 @@
           }
           console.log(timings);
           let curFrame = 0;
-          while (this.ms > curFrame * 1000 / this.fps.video && curFrame < 3) {
+          while (this.ms > curFrame * 1000 / this.fps.video) {
             let monitor = new Uint32Array(this.size.width * this.size.height);
             for (let timing of timings) {
               timing.filter((i)=>(curFrame-1)*1000<i[0]&&i[0]<=curFrame*1000).forEach((i)=>{
@@ -3705,8 +3801,12 @@
             for (let src of handlingSources.values()) {
               src.options.forEach((option)=>Object.keys(option.__option).forEach((key)=>{if(OptionValue.prototype.isPrototypeOf(option.__option[key])){option.__option[key].time = (curFrame * 1000 - src.options[0].frames[0])/(src.options[0].frames[1]-src.options[0].frames[0]);option[key]=option.__option[key];}}))
               let data = await src.getFrame(curFrame - Math.round(src.options[0].frames[0] / 1000));
-              console.log(data);
+              //console.log(data);
               if (VideoFrame.prototype.isPrototypeOf(data)) {
+                if (data.codedWidth == 0 || data.codedHeight == 0) {
+                  data.close();
+                  continue;
+                }
                 let rect = {
                   width: src.options[0].width.curValue,
                 };
@@ -3732,12 +3832,14 @@
                     temp = new Uint8Array(data.allocationSize());
                     [Y, U, V] = await data.copyTo(temp);
                     console.log([Y,U,V]);
+                    //console.time("i420");
                     temp = Uint32Array.from(temp.slice(Y.offset, Y.offset+Y.stride*data.displayHeight), (value, index, array)=>{
-                      let [y, cb, cr] = [value / 255, temp[U.offset+Math.floor(index/(Y.stride*2))*U.stride+Math.floor((index%Y.stride)/2)] / 255 - 0.5, temp[V.offset+Math.floor(index/(Y.stride*2))*V.stride+Math.floor((index%Y.stride)/2)] / 255 - 0.5];
-                      return (0xff000000 | (Math.max(0, (y + cb * 1.13983) * 255 >>> 0) << 16)
-                        | (Math.max(0, (y + cb * (-0.39465) + cr * (-0.58060)) * 255 >>> 0) << 8)
-                        | (Math.max(0, y + cr * 2.03211) * 255 >>> 0)) >>> 0;
+                      let [y, cb, cr] = [Math.min(Math.max(0, (value-16)/219), 1), (temp[U.offset+Math.floor(index/(Y.stride*2))*U.stride+Math.floor((index%Y.stride)/2)] - 128) / 255, (temp[V.offset+Math.floor(index/(Y.stride*2))*V.stride+Math.floor((index%Y.stride)/2)] - 128) / 255];
+                      return (0xff000000 | (Math.min(Math.max(0, (y + cb * 1.772) * 255) >>> 0, 255) << 16)
+                        | (Math.min(Math.max(0, (y + cb * (-0.34414) + cr * (-0.71414)) * 255) >>> 0, 255) << 8)
+                        | (Math.min(Math.max(0, (y + cr * 1.402) * 255) >>> 0, 255))) >>> 0;
                     });
+                    //console.timeEnd("i420");
                     break;
                   case "I422":
                   case "I444":
@@ -3752,63 +3854,557 @@
                     });
                     break;
                 }
+                data.close();
+                //console.time("scale");
                 let displayWidth = Math.round(src.options[0].width.curValue);
                 let displayHeight = Math.round(src.options[0].height.curValue);
                 let scaleWidth = displayWidth / data.displayWidth;
                 let scaleHeight = displayHeight / data.displayHeight;
                 if (scaleWidth  != 1 || scaleHeight != 1) {
-                  temp = new Uint32Array([...(function*(w,h,oldW,oldH){for(let y=0;y<h;y++){for(let x=0;x<w;x++){
-                    let deltaX = x / scaleWidth - Math.floor(x / scaleWidth);
-                    let deltaY = y / scaleHeight - Math.floor(y / scaleHeight);
-                    if (deltaX == 0 && deltaY == 0 && false) {
-                      yield temp[Math.round((y*oldW / scaleHeight)+(x / scaleWidth))];
-                      continue;
-                    } else {
-                      let oldPos = {x:Math.floor(x / scaleWidth),y:Math.floor(y / scaleHeight)};
-                      yield [0xff, 0xff00, 0xff0000, 0xff000000].reduce((total, i)=>(total | ((((temp[oldPos.x+oldPos.y*oldW] & i) * (1-deltaX) * 0.5 + (temp[Math.min(oldPos.x+1,oldW-1)+oldPos.y*oldW] & i) * deltaX * 0.5) * (1-deltaY) +
-                        ((temp[oldPos.x+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * (1-deltaX) * 0.5 + (temp[Math.min(oldPos.x+1,oldW-1)+Math.min(oldPos.y+1,oldH-1)*oldW] & i) * deltaX * 0.5) * deltaY) & i))>>>0, 0);
+                  temp = new Uint32Array([...(function*(w,h,oldW,oldH){
+                    for(let y=0; y < h; y++) {
+                      for(let x=0; x < w; x++) {
+                        let srcX = Math.floor(x / scaleWidth);
+                        let srcY = Math.floor(y / scaleHeight);
+                        let deltaX = x / scaleWidth - srcX;
+                        let deltaY = y / scaleHeight - srcY;
+                        if (deltaX == 0 && deltaY == 0) {
+                          yield temp[Math.round((y*oldW / scaleHeight)+(x / scaleWidth))];
+                          continue;
+                        } else {
+                          var red = 0;
+                          var green = 0;
+                          var blue = 0;
+                          var alpha = 0;
+                          let v
+                          if (srcX-deltaX > -1 && srcY-deltaY > -1 && srcX-deltaX < w && srcY-deltaY < h) {
+                            let percentage = (1 - deltaX) * (1 - deltaY);
+                            let value = temp[srcX + srcY * oldW];
+                            red += (value & 0xff) * percentage;
+                            green += ((value & 0xff00) >>> 8) * percentage;
+                            blue += ((value & 0xff0000) >>> 16) * percentage;
+                            alpha += ((value & 0xff000000) >>> 24) * percentage;
+                          } else {
+                            alpha += 63.25;
+                          }
+                          if (srcX-deltaX+1 > -1 && srcY-deltaY > -1 && srcX-deltaX+1 < w && srcY-deltaY < h) {
+                            let percentage = deltaX * (1 - deltaY);
+                            let value = temp[srcX+1 + srcY * oldW];
+                            red += (value & 0xff) * percentage;
+                            green += ((value & 0xff00) >>> 8) * percentage;
+                            blue += ((value & 0xff0000) >>> 16) * percentage;
+                            alpha += ((value & 0xff000000) >>> 24) * percentage;
+                          } else {
+                            alpha += 63.25;
+                          }
+                          if (srcX-deltaX > -1 && srcY-deltaY+1 > -1 && srcX-deltaX < w && srcY-deltaY+1 < h) {
+                            let percentage = (1 - deltaX) * deltaY;
+                            let value = temp[srcX + (srcY+1) * oldW];
+                            red += (value & 0xff) * percentage;
+                            green += ((value & 0xff00) >>> 8) * percentage;
+                            blue += ((value & 0xff0000) >>> 16) * percentage;
+                            alpha += ((value & 0xff000000) >>> 24) * percentage;
+                          } else {
+                            alpha += 63.25;
+                          }
+                          if (srcX-deltaX+1 > -1 && srcY-deltaY+1 > -1 && srcX-deltaX+1 < w && srcY-deltaY+1 < h) {
+                            let percentage = deltaX * deltaY;
+                            let value = temp[srcX+1 + (srcY+1) * oldW];
+                            red += (value & 0xff) * percentage;
+                            green += ((value & 0xff00) >>> 8) * percentage;
+                            blue += ((value & 0xff0000) >>> 16) * percentage;
+                            alpha += ((value & 0xff000000) >>> 24) * percentage;
+                          } else {
+                            alpha += 63.25;
+                          }
+                          yield ((Math.min(Math.max(0, Math.round(alpha)), 255) << 24)
+                        | (Math.min(Math.max(0, Math.round(blue)), 255) << 16)
+                        | (Math.min(Math.max(0, Math.round(green)), 255) << 8)
+                        | Math.min(Math.max(0, Math.round(red)), 255)) >>> 0;
+                        }
+                      }
                     }
-                  }}})(displayWidth,displayHeight, data.displayWidth, data.displayHeight)]);
+                  })(displayWidth,displayHeight, data.displayWidth, data.displayHeight)]);
                 }
+                //console.timeEnd("scale");
+                //console.time("rotate");
                 let cosA = Math.cos((src.options[0].rotate.curValue || 0) * 2 * Math.PI / 360);
                 let sinA = Math.sin((src.options[0].rotate.curValue || 0) * 2 * Math.PI / 360);
                 let xs = [0, displayWidth * cosA - displayHeight * sinA, displayWidth * cosA,  -1*displayHeight * sinA];
                 let ys = [0, displayWidth * sinA + displayHeight * cosA, displayWidth * sinA, displayHeight * cosA];
                 let offsetX = Math.min(...xs);
                 let offsetY = Math.min(...ys);
-                let w = Math.ceil(Math.max(...xs)-offsetX);
-                let h = Math.ceil(Math.max(...ys)-offsetY);
-                let temp2 = new Uint32Array(w * h);
-                temp.forEach((value, index)=>{
-                  if (value & 0xff000000 == 0) {return;}
-                  let x = index % displayWidth;
-                  let y = (index - x) / displayWidth;
-                  let X = x * cosA - y * sinA;
-                  let Y = x * sinA + y * cosA;
-                  temp2[Math.round(X - offsetX) + Math.round(Y - offsetY) * w] = value;
-                });
-                //data.close();
-                temp2.forEach((value, index)=>{
-                  if (value & 0xff000000 == 0) {return;}
-                  let x = index % w;
-                  let y = (index - x) / w;
-                  x += offsetX;
-                  y += offsetY;
-                  if (0 <= x && x <= this.size.width - 1 && 0 <= y && y <= this.size.height - 1) {
-                    let distIndex = Math.round(x)+Math.round(y)*this.size.width;
-                    let dist = monitor[distIndex];
-                    let alpha = ((value & 0xff000000) >>> 0) / 0xff000000;
-                    monitor[distIndex] = ((Math.round((dist & 0xff) * (1 - alpha) + (value & 0xff) * alpha) & 0xff) +
-                      (Math.round((dist & 0xff00) * (1 - alpha) + (value & 0xff00) * alpha) & 0xff00) +
-                      (Math.round((dist & 0xff0000) * (1 - alpha) + (value & 0xff0000) * alpha) & 0xff0000) | 0xff000000) >>> 0;
+                let w = Math.round(Math.max(...xs)-offsetX);
+                let h = Math.round(Math.max(...ys)-offsetY);
+                var temp2;
+                if ((src.options[0].rotate.curValue || 0) === 0 && 0) {
+                  temp2 = temp;
+                } else {
+                  temp2 = new Uint32Array(w * h);
+                  for (let y=0; y < h; y++) {
+                    for (let x=0; x < w; x++) {
+                      let X = (x + offsetX) * cosA + (y + offsetY) * sinA;
+                      let Y = -1 * (x + offsetX) * sinA + (y + offsetY) * cosA;
+                      if (X <= -1 || Y <= -1 || X >= displayWidth || Y >= displayHeight) {
+                        continue;
+                      }
+                      let intX = Math.floor(X);
+                      let intY = Math.floor(Y);
+                      let deltaX = X - intX;
+                      let deltaY = Y - intY;
+                      var red = 0;
+                      var green = 0;
+                      var blue = 0;
+                      var alpha = 0;
+                      if (X-deltaX > -1 && Y-deltaY > -1 && X-deltaX < displayWidth && Y-deltaY < displayHeight) {
+                        let percentage = (1 - deltaX) * (1 - deltaY);
+                        let value = temp[intX + intY * displayWidth];
+                        red += (value & 0xff) * percentage;
+                        green += ((value & 0xff00) >>> 8) * percentage;
+                        blue += ((value & 0xff0000) >>> 16) * percentage;
+                        alpha += ((value & 0xff000000) >>> 24) * percentage;
+                      }
+                      if (X-deltaX+1 > -1 && Y-deltaY > -1 && X-deltaX+1 < displayWidth && Y-deltaY < displayHeight) {
+                        let percentage = deltaX * (1 - deltaY);
+                        let value = temp[intX+1 + intY * displayWidth];
+                        red += (value & 0xff) * percentage;
+                        green += ((value & 0xff00) >>> 8) * percentage;
+                        blue += ((value & 0xff0000) >>> 16) * percentage;
+                        alpha += ((value & 0xff000000) >>> 24) * percentage;
+                      }
+                      if (X-deltaX > -1 && Y-deltaY+1 > -1 && X-deltaX < displayWidth && Y-deltaY+1 < displayHeight) {
+                        let percentage = (1 - deltaX) * deltaY;
+                        let value = temp[intX + (intY+1) * displayWidth];
+                        red += (value & 0xff) * percentage;
+                        green += ((value & 0xff00) >>> 8) * percentage;
+                        blue += ((value & 0xff0000) >>> 16) * percentage;
+                        alpha += ((value & 0xff000000) >>> 24) * percentage;
+                      }
+                      if (X-deltaX+1 > -1 && Y-deltaY+1 > -1 && X-deltaX+1 < displayWidth && Y-deltaY+1 < displayHeight) {
+                        let percentage = deltaX * deltaY;
+                        let value = temp[intX+1 + (intY+1) * displayWidth];
+                        red += (value & 0xff) * percentage;
+                        green += ((value & 0xff00) >>> 8) * percentage;
+                        blue += ((value & 0xff0000) >>> 16) * percentage;
+                        alpha += ((value & 0xff000000) >>> 24) * percentage;
+                      }
+                      temp2[x + y * w] = ((Math.min(Math.max(0, Math.round(alpha)), 255) << 24)
+                        | (Math.min(Math.max(0, Math.round(blue)), 255) << 16)
+                        | (Math.min(Math.max(0, Math.round(green)), 255) << 8)
+                        | Math.min(Math.max(0, Math.round(red)), 255)) >>> 0;
+                    }
                   }
-                });
+                }
+                //console.timeEnd("rotate");
+                //console.time("paste");
+                // ABGR(BGRA) -> ARGB(RGBA)
+                if (src.options[0].posOriginRoot == "top-left") {
+                  offsetX += src.options[0].x.curValue;
+                  offsetY += src.options[0].y.curValue;
+                } else if (src.options[0].posOriginRoot == "center") {
+                  offsetX += src.options[0].x.curValue + this.size.width / 2;
+                  offsetY += src.options[0].y.curValue + this.size.height / 2;
+                }
+                if (src.options[0].posOrigin == "top-left") {
+                  // do nothing
+                } else if (src.options[0].posOrigin == "center") {
+                  offsetX -= (src.options[0].width.curValue * cosA - src.options[0].height.curValue * sinA) / 2;
+                  offsetY -= (src.options[0].width.curValue * sinA + src.options[0].height.curValue * cosA) / 2;
+                }
+                for (let y=0; y < h; y++) {
+                  for (let x=0; x < w; x++) {
+                    let value = temp2[x+y*w];
+                    if (value & 0xff000000 == 0) {continue;}
+                    let X = Math.round(x + offsetX);
+                    let Y = Math.round(y + offsetY);
+                    if (0 <= X && X <= this.size.width - 1 && 0 <= Y && y <= this.size.height - 1) {
+                      let distIndex = X+Y*this.size.width;
+                      let dist = monitor[distIndex];
+                      let alpha = ((value & 0xff000000) >>> 24) * (1 - src.options[0].alpha.curValue) / 0xff;
+                      monitor[distIndex] = ((Math.round((dist & 0xff) * (1 - alpha) + (value & 0xff) * alpha) & 0xff) +
+                        (Math.round((dist & 0xff00) * (1 - alpha) + (value & 0xff00) * alpha) & 0xff00) +
+                        (Math.round((dist & 0xff0000) * (1 - alpha) + (value & 0xff0000) * alpha) & 0xff0000) | 0xff000000) >>> 0;
+                    }
+                  }
+                }
+                //console.timeEnd("paste");
               }
             }
             let result = new VideoFrame(monitor, {format:"RGBA", codedWidth:this.size.width, codedHeight:this.size.height, colorSpace:new VideoColorSpace(), timestamp:(curFrame/this.fps.video)*1000});
             console.log(result);
+            try {
+              this.encoder.encode(result);
+            } catch(e) {
+              console.error(e);
+            }
+            result.close();
             curFrame += 1;
           }
+          this.encoder.addEventListener("dequeue", (e)=>{
+            if (this.encoder.encodeQueueSize == 0) {
+              setTimeout(()=>{
+                this.encoder.close();
+                console.log("encode finished.");
+                this.generateOutputVideo().catch(console.error);
+              }, 100);
+            }
+          });
+          this.encoder.flush();
+        }
+
+        handleEncodedChunk(chunk, metadata) {
+          this.encodedVideoChunks.push(chunk);
+        }
+
+        convertIntToArray(value, length) {
+          let result = [];
+          for (let i=length-1; i >=0; i--) {
+            result.push((value >>> i) & 0xff);
+          }
+          return result;
+        }
+
+        convertBigIntToArray(value, length) {
+          let result = [];
+          for (let i=BigInt(length-1); i >=0n; i-=1n) {
+            result.push(parseInt((value >> i) & 0xffn));
+          }
+          return result;
+        }
+
+        async generateOutputVideo() {
+          var outputVideoFile;
+          try{
+            outputVideoFile = await window.showSaveFilePicker({
+              suggestedName: "output.mp4"
+            });
+          } catch {
+            return;
+          }
+          var outputBoxes = [];
+          let creationTime = this.convertIntToArray(Math.floor((new Date() - new Date("1904-01-01 00:00:00")) / 1000), 4);
+          let modificationTime = [...creationTime];
+          let duration = this.convertIntToArray(Math.ceil(this.ms / 1000), 4);
+          if (true) {
+            outputBoxes.push(new MP4Box("ftyp"));
+            outputBoxes.push(new MP4Box("moov"));
+            outputBoxes.push(new MP4Box("mdat"));
+
+            outputBoxes[0].child = new Uint8Array([..."mp42\0\0\0\0isommp42"].map((ch)=>ch.charCodeAt(0)));
+
+            /*  moov
+                mvhd
+                trak
+                tkhd
+                mdia
+                mdhd
+                hdlr
+                minf
+                vmhd
+                dinf
+                dref
+                url 
+                stbl
+                stsd
+                avc1
+                avcC
+                stts
+                stsc
+                stsz
+                stco
+                stss
+                mdat */
+
+            outputBoxes[1].child = [
+              new MP4Box("mvhd"),
+            ];
+
+
+            outputBoxes[1].child[0].child  = new Uint8Array(100);
+            outputBoxes[1].child[0].child.set([0], 0);
+            outputBoxes[1].child[0].child.set([0, 0, 0], 1);
+            outputBoxes[1].child[0].child.set(creationTime, 4);
+            outputBoxes[1].child[0].child.set(modificationTime, 8);
+            outputBoxes[1].child[0].child.set([0, 0, 0, 1], 12);
+            outputBoxes[1].child[0].child.set(duration, 16);
+            outputBoxes[1].child[0].child.set([0, 0, 0, 1], 20);
+            outputBoxes[1].child[0].child.set([1, 0], 24);
+            outputBoxes[1].child[0].child.set([
+              [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+              [0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0],
+              [0, 0, 0, 0], [0, 0, 0, 0], [0, 1, 0, 0]
+            ].flat(), 26); //matrix, 36 bytes, 16.16 fixed float
+            outputBoxes[1].child[0].child.set([0, 0, 0, 0], 62);
+            outputBoxes[1].child[0].child.copyWithin(66, 16, 20);
+            outputBoxes[1].child[0].child.set([0, 0, 0, 0], 70);
+            outputBoxes[1].child[0].child.set([0, 0, 0, 0], 74);
+            outputBoxes[1].child[0].child.copyWithin(78, 16, 20);
+            outputBoxes[1].child[0].child.set([0, 0, 0, 0], 82);
+            outputBoxes[1].child[0].child.set([0, 0, 0, 0], 86); //next track id
+            // 謎の 10 bytes が余った...
+
+            let tracks = [];
+            tracks.push({});
+            var trackId = [0, 0, 0, 1];
+            var layerId = [0, 0];
+            for (let track of tracks) {
+              let tr = new MP4Box("trak");
+              let trackTimeScale = this.convertIntToArray(this.fps.video*1000, 4);
+              outputBoxes[1].child.push(tr);
+              tr.child = [
+                new MP4Box("tkhd"),
+                new MP4Box("mdia")
+              ];
+              tr.child[0].child = new Uint8Array(84);
+              tr.child[0].child.set([0], 0);
+              tr.child[0].child.set([0, 0, 0], 1);
+              tr.child[0].child.set(creationTime, 4);
+              tr.child[0].child.set(modificationTime, 8);
+              tr.child[0].child.set(trackId, 12);
+              // 4 bytes reserved
+              tr.child[0].child.set(duration, 20);
+              // 8 bytes reserved
+              tr.child[0].child.set(layerId, 32);
+              tr.child[0].child.set([0, 0], 34);
+              tr.child[0].child.set([1, 0], 36);
+              // 2 bytes reserved
+              // 36 bytes Matrix structure
+              tr.child[0].child.set(this.convertIntToArray(this.size.width, 4), 76);
+              tr.child[0].child.set(this.convertIntToArray(this.size.height, 4), 80);
+
+              tr.child[1].child = [
+                new MP4Box("mdhd"),
+                new MP4Box("hdlr"),
+                new MP4Box("minf")
+              ];
+
+              tr.child[1].child[0].child = new Uint8Array(24);
+              tr.child[1].child[0].child.set(tr.child[0].child.slice(0, 12));
+              tr.child[1].child[0].child.set(trackTimeScale, 12);
+              tr.child[1].child[0].child.set(duration, 16);
+              tr.child[1].child[0].child.set([0, 0], 20); // 0: English, 10: Japanese
+              tr.child[1].child[0].child.set([0, 0], 22); // playback quality???
+
+              let componentName = "vedit VideoHandler"
+              tr.child[1].child[1].child = new Uint8Array(24+componentName.length);
+              tr.child[1].child[1].child.set([0], 0);
+              tr.child[1].child[1].child.set([0, 0, 0], 1);
+              tr.child[1].child[1].child.set([0, 0, 0, 0], 4);
+              tr.child[1].child[1].child.set([..."vide"].map((ch)=>ch.charCodeAt(0)), 8);
+              tr.child[1].child[1].child.set([0, 0, 0, 0], 12);
+              tr.child[1].child[1].child.set([0, 0, 0, 0], 16);
+              tr.child[1].child[1].child.set([0, 0, 0, 0], 20);
+              tr.child[1].child[1].child.set([...componentName].map((ch)=>ch.charCodeAt(0)), 24);
+
+              tr.child[1].child[2].child = [
+                new MP4Box("vmhd"),
+                new MP4Box("dinf"),
+                new MP4Box("stbl")
+              ];
+
+              tr.child[1].child[2].child[0].child = new Uint8Array(12);
+              tr.child[1].child[2].child[0].child.set([0], 0);
+              tr.child[1].child[2].child[0].child.set([0, 0, 0], 1);
+              tr.child[1].child[2].child[0].child.set([0, 0], 4);
+              tr.child[1].child[2].child[0].child.set([0, 0, 0, 0, 0, 0], 6);
+              
+              tr.child[1].child[2].child[1].child = [new MP4Box("dref")];
+              tr.child[1].child[2].child[1].child[0].child = new Uint8Array(8);
+              // 手抜き。ぜんぶ0だから。
+
+              let stbl = tr.child[1].child[2].child[2];
+
+              stbl.child = [
+                new MP4Box("stsd"),
+                new MP4Box("stts"),
+                new MP4Box("stsc"),
+                new MP4Box("stco"),
+                new MP4Box("stsz"),
+                new MP4Box("stss")
+              ];
+
+              stbl.child[0].child = [
+                new Uint8Array(8),
+                new MP4Box("avc1")
+              ];
+
+              stbl.child[0].child[0].set([0], 0);
+              stbl.child[0].child[0].set([0, 0, 0], 1);
+              stbl.child[0].child[0].set([0, 0, 0, 1], 4);
+              
+              stbl.child[0].child[1].child = [
+                new Uint8Array(78),
+                new MP4Box("avcC")
+              ];
+
+              // 6 bytes reserved
+              stbl.child[0].child[1].child[0].set([0, 1], 6);
+              stbl.child[0].child[1].child[0].set([0, 0], 8);
+              stbl.child[0].child[1].child[0].set([0, 0], 10);
+              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 12);
+              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 16);
+              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 20);
+              stbl.child[0].child[1].child[0].set(this.convertIntToArray(this.size.width, 2), 24);
+              stbl.child[0].child[1].child[0].set(this.convertIntToArray(this.size.height, 2), 26);
+              stbl.child[0].child[1].child[0].set([0, 72, 0, 0], 28); // 72dpi
+              stbl.child[0].child[1].child[0].set([0, 72, 0, 0], 32); // 72dpi
+              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 36);
+              stbl.child[0].child[1].child[0].set([0, 1], 40);
+              // 32 bytes of Compressor name (skip)
+              stbl.child[0].child[1].child[0].set([0, 24], 74);
+              stbl.child[0].child[1].child[0].set([255, 255], 76); // 0xffff -> -0x0001
+              
+              
+              
+              
+              
+              
+
+              stbl.child[1].child = new Uint8Array(16);
+              stbl.child[1].child.set([0], 0);
+              stbl.child[1].child.set([0, 0, 0], 1);
+              stbl.child[1].child.set([0, 0, 0, 1], 4);
+              stbl.child[1].child.set([...this.convertIntToArray(this.encodedVideoChunks.length, 4), ...this.convertIntToArray(1000)], 8);
+
+              let stsc_entries = [];
+              var stsc_chunkIndex = 0;
+              for (let i = 0; i < this.encodedVideoChunks.length; i++) {
+                if (this.encodedVideoChunks[i].type == "delta") {
+                  stsc_entries.at(-1)[1]++;
+                } else {
+                  stsc_chunkIndex++;
+                  if (stsc_entries.length > 1 && stsc_entries.at(-1)[1] == stsc_entries.at(-2)[1]) {
+                    stsc_entries.at(-1)[0] = stsc_chunkIndex;
+                    stsc_entries.at(-1)[1] = 0;
+                  } else {
+                    stsc_entries.push([stsc_chunkIndex, 1, 1])
+                  }
+                }
+              }
+              stbl.child[2].child = new Uint8Array(8 + 12*stsc_entries.length);
+              stbl.child[2].child.set([0], 0);
+              stbl.child[2].child.set([0, 0, 0], 1);
+              stbl.child[2].child.set(this.convertIntToArray(stsc_entries.length), 4);
+              stbl.child[2].child.set(stsc_entries.flat().map((i)=>this.convertIntToArray(i, 4)).flat(), 8);
+
+              track.chunkSize = this.encodedVideoChunks.filter((chunk)=>chunk.type=="key").length;
+
+              track.stco = stbl.child[3];
+              stbl.child[3].child = new Uint8Array(8 + track.chunkSize*8);
+              stbl.child[3].child.set([0], 0);
+              stbl.child[3].child.set([0, 0, 0], 1);
+              stbl.child[3].child.set(this.convertIntToArray(track.chunkSize, 4), 4);
+              // 実際のオフセットはまだ確定できないからスキップ
+
+              if (this.encodedVideoChunks.some((chunk)=>chunk.byteLength!=this.encodedVideoChunks[0].byteLength)){
+                stbl.child[4].child = new Uint8Array(12 + this.encodedVideoChunks.length * 8);
+                stbl.child[4].child.set([0], 0);
+                stbl.child[4].child.set([0, 0, 0], 1);
+                stbl.child[4].child.set(this.convertIntToArray(this.encodedVideoChunks.length, 4), 4);
+                for (let i=0; i < this.encodedVideoChunks.length; i++) {
+                  stbl.child[4].child.set(this.convertIntToArray(this.encodedVideoChunks[i].byteLength, 4), 8+8*i);
+                  stbl.child[4].child.set(this.convertIntToArray(i+1, 4), 12+8*i);
+                }
+              } else {
+                stbl.child[4].child = new Uint8Array(12);
+                stbl.child[4].child.set([0], 0);
+                stbl.child[4].child.set([0, 0, 0], 1);
+                stbl.child[4].child.set([0, 0, 0, 0], 4);
+              }
+
+              let keyChunks = [];
+              this.encodedVideoChunks.forEach((chunk, index)=>{
+                if (chunk.type == "key") {
+                  keyChunks.push(index+1);
+                }
+              });
+              stbl.child[5].child = new Uint8Array(8 + keyChunks.length * 8);
+              stbl.child[5].child.set([0], 0);
+              stbl.child[5].child.set([0, 0, 0], 1);
+              stbl.child[5].child.set(this.convertIntToArray(keyChunks.length, 4), 4);
+              for (let i=0; i < keyChunks.length; i++) {
+                stbl.child[5].child.set(this.convertIntToArray(i+1, 4), 8+8*i);
+                stbl.child[5].child.set(this.convertIntToArray(keyChunks[i], 4), 12+8*i);
+              }
+            }
+
+            let metaOffset = outputBoxes.reduce((total, box)=>total+box.getLength(), 0n);
+            let totalChunkSize = tracks.reduce((total, track)=>total+BigInt(track.chunkSize), 0n);
+            if (totalChunkSize > 0xffffffffn) {
+              metaOffset += 8n;
+            }
+            if (metaOffset + totalChunkSize > 0xffffffffn) {
+              // stco -> co64
+              tracks.forEach((track)=>{
+                track.stco.type = "co64";
+                track.stco.child = new Uint8Array(8 + track.chunkSize*12);
+                track.stco.child.set([0], 0);
+                track.stco.child.set([0, 0, 0], 1);
+                track.stco.child.set(this.convertIntToArray(track.chunkSize, 4), 4);
+              });
+              var chunkOffset = metaOffset;
+              tracks.forEach((track)=>{
+                if (true) {
+                  var k=0;
+                  for (let i=0; i < this.encodedVideoChunks.length; i++) {
+                    if (this.encodedVideoChunks[i].type == "key") {
+                      track.stco.child.set(this.convertBigIntToArray(chunkOffset, 8), 8 + k * 12);
+                      track.stco.child.set(this.convertIntToArray(k+1, 4), 16 + k * 12);
+                      k += 1;
+                    }
+                    chunkOffset += BigInt(this.encodedVideoChunks[i].byteLength);
+                  }
+                }
+              });
+            } else {
+              var chunkOffset = metaOffset;
+              tracks.forEach((track)=>{
+                if (true) {
+                  var k=0;
+                  for (let i=0; i < this.encodedVideoChunks.length; i++) {
+                    if (this.encodedVideoChunks[i].type == "key") {
+                      track.stco.child.set(this.convertBigIntToArray(chunkOffset, 4), 8 + k * 8);
+                      track.stco.child.set(this.convertIntToArray(k+1, 4), 8 + k * 8);
+                      k += 1;
+                    }
+                    chunkOffset += BigInt(this.encodedVideoChunks[i].byteLength);
+                  }
+                }
+              });
+
+              outputBoxes.pop(2);
+
+              let metaBinaries = outputBoxes.map((box)=>box.getBinary());
+
+              let fileStream = await outputVideoFile.createWritable();
+              for (let binary of metaBinaries) {
+                await fileStream.write(binary);
+              }
+              
+              var dataHeader;
+              if (totalChunkSize > 0xffffffffn) {
+                dataHeader = new Uint8Array([0, 0, 0, 1, ...[..."mdat"].map((ch)=>ch.charCodeAt(0)), ...this.convertBigIntToArray(totalChunkSize + 16n, 8)]);
+              } else {
+                dataHeader = new Uint8Array([...this.convertBigIntToArray(totalChunkSize + 8n, 4), ...[..."mdat"].map((ch)=>ch.charCodeAt(0))]);
+              }
+
+              await fileStream.write(dataHeader);
+
+              for (let chunk of this.encodedVideoChunks) {
+                let buffer = new Uint8Array(chunk.byteLength);
+                chunk.copyTo(buffer);
+                await fileStream.write(buffer);
+              }
+
+              try{
+                await fileStream.close();
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          }
+
+          console.log("nothing...");
         }
       }
       var main = new EditorMain();
