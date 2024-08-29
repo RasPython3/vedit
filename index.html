@@ -1328,7 +1328,7 @@
           </div>
           <div>
             <label>Sample rate:</label>
-            <input "samplerate"type="number">
+            <input name="samplerate" type="number">
           </div>
           <div>
             <label>Stereo audio:</label>
@@ -1441,6 +1441,22 @@
 
       var srcIds = [];
       var materialIds = [];
+
+      function convertBigIntToArray(value, length) {
+        let result = [];
+        for (let i=BigInt(length-1); i >= 0n; i-=1n) {
+          result.push(parseInt((value >> (i*8n)) & 0xffn));
+        }
+        return result;
+      }
+
+      function convertIntToArray(value, length) {
+        let result = [];
+        for (let i=length-1; i >= 0; i--) {
+          result.push((value >>> (i*8)) & 0xff);
+        }
+        return result;
+      }
 
       async function convertSVGToVideoFrame(svg, options) {
         let {ms=0, width, height} = options;
@@ -1907,6 +1923,9 @@
         get previewElement() {
           return this.__preview;
         }
+        hasAudio() {
+          return false;
+        }
         setupDetail() {
           let px = document.createElement("span");
           px.setAttribute("class", "px");
@@ -2157,15 +2176,21 @@
       }
 
       class MP4Box extends Object {
-        constructor(type) {
+        constructor(type, is_parent=undefined) {
           super();
           this.type = type;
           if (['cmov', 'ctts', 'dinf', 'edts', 'esds', 'free', 'ftyp', 'iods', 'junk', 'mdia', 'minf', 'moov', 'mvhd', 'pict', 'pnot', 'rmda', 'rmra', 'skip', 'stbl', 'trak', 'uuid', 'wide'].includes(type)) {
             this.isParent = true;
-          } else if (['ctab', 'co64', 'dref', 'fiel', 'mdat', 'rdrf', 'rmcd', 'rmcs', 'rmdr', 'rmqu', 'rmvc', 'wfex', 'cmvd', 'co64', 'dcom', 'elst', 'gmhd', 'hdlr', 'mdhd', 'smhd', 'stco', 'stsc', 'stsd', 'stss', 'stsz', 'stts', 'tkhd', 'tname', 'udta', 'vmhd'].includes(type)) {
-            this.isParent = true;
           } else {
-            throw "unexpected box type: " + type;
+            if (!['ctab', 'co64', 'dref', 'fiel', 'mdat', 'rdrf', 'rmcd', 'rmcs', 'rmdr', 'rmqu', 'rmvc', 'wfex', 'cmvd', 'co64', 'dcom', 'elst', 'gmhd', 'hdlr', 'mdhd', 'smhd', 'stco', 'stsc', 'stsd', 'stss', 'stsz', 'stts', 'tkhd', 'tname', 'udta', 'vmhd'].includes(type)) {
+              console.warn("unexpected box type: " + type);
+              this.isParent = false;
+            } else {
+              this.isParent = false;
+            }
+          }
+          if (is_parent != undefined) {
+            this.isParent = is_parent;
           }
           this.child = undefined;
         }
@@ -2173,12 +2198,12 @@
           var size;
           if (this.child == undefined) {
             size = 0n;
-          } else if (this.isParent && Array.prototype.isPrototypeOf(this.child) && this.child.every((ch)=>MP4Box.prototype.isPrototypeOf(ch), true)) {
-            size = this.child.reduce((total, ch)=>total+ch.getLength(), 0n);
+          } else if (this.isParent && Array.prototype.isPrototypeOf(this.child) && this.child.every((ch)=>(MP4Box.prototype.isPrototypeOf(ch) || Uint8Array.prototype.isPrototypeOf(ch)), true)) {
+            size = this.child.reduce((total, ch)=>total+(MP4Box.prototype.isPrototypeOf(ch)?ch.getLength():BigInt(ch.length)), 0n);
           } else if (Uint8Array.prototype.isPrototypeOf(this.child)) {
             size = BigInt(this.child.length);
           } else {
-            throw "unexpected child type: "+this.child;
+            throw "unexpected child type: " + this.child;
           }
           size += 8n;
           if (size > 0xffffffffffn) {
@@ -2192,8 +2217,8 @@
           var size = 0;
           if (this.child == undefined) {
             binValue = new Uint8Array(0);
-          } else if (this.isParent && Array.prototype.isPrototypeOf(this.child) && this.child.every((ch)=>MP4Box.prototype.isPrototypeOf(ch), true)) {
-            binValue = new Uint8Array(this.child.reduce((total, ch)=>[...total, ...ch.getBinary()], []));
+          } else if (this.isParent && Array.prototype.isPrototypeOf(this.child) && this.child.every((ch)=>(MP4Box.prototype.isPrototypeOf(ch) || Uint8Array.prototype.isPrototypeOf(ch)), true)) {
+            binValue = new Uint8Array(this.child.reduce((total, ch)=>[...total, ...(MP4Box.prototype.isPrototypeOf(ch)?ch.getBinary():ch)], []));
           } else if (Uint8Array.prototype.isPrototypeOf(this.child)) {
             binValue = this.child;
           } else {
@@ -2226,6 +2251,66 @@
           }
           result.set([...this.type].map((ch)=>ch.charCodeAt(0)), 4);
           return result;
+        }
+      }
+
+      class MultipleAudioBuffersSourceNode extends AudioBufferSourceNode {
+        constructor(context, buffers, options={}) {
+          super(context, {...options, buffer: null});
+          this.outputNode = new GainNode(context, {
+            gain: 1,
+            channelCount: options.channelCount,
+            channelCountMode: options.channelCountMode,
+            channelInterpretation: options.channelInterpretation
+          });
+          this.buffers = [];
+          this.sourceNodes = [];
+          for (let buffer of buffers) {
+            let node = new AudioBufferSourceNode(context, {
+              ...options,
+              buffer: buffer,
+            });
+            node.connect(this.outputNode);
+            this.sourceNodes.push(node);
+            this.buffers.push(buffer);
+          }
+
+          this.connect = this.outputNode.connect.bind(this);
+          this.disconnect = this.outputNode.disconnect.bind(this);
+
+          this._currentNode = undefined;
+          this._startTime = undefined
+        }
+
+        get currentNode() {
+          if (this._startTime != undefined) {
+            var timeOffset = 0;
+          }
+        }
+
+        start(when, offset, duration) {
+          this._currentNode = undefined;
+          var timeOffset = 0;
+          for (let node of this.sourceNodes) {
+            if (offset < timeOffset + node.buffer.duration) {
+              if (duration - timeOffset < 0) {
+                break;
+              }
+              if (this._currentNode == undefined) {
+                this._currentNode = node;
+              }
+              node.start(when+timeOffset, Math.max(0, timeOffset + node.buffer.duration - offset), duration-timeOffset);
+            }
+            timeOffset += node.buffer.duration;
+          }
+        }
+
+        stop(when) {
+          for (let node of this.nodes) {
+            if (offset < timeOffset + node.buffer.duration) {
+              node.stop(when);
+            }
+          }
         }
       }
 
@@ -2305,7 +2390,7 @@
                 };
                 tracks.push(track);
               }
-              if (type == "tkhd") {
+              /*if (type == "tkhd") {
                 switch (array.slice(i+(1+3+4*5+8+2), i+(1+3+4*5+8+2+2)).reduce((total, i)=>total*256+i, 0)) {
                   case 0:
                     track.type = 'video';
@@ -2317,10 +2402,22 @@
                     track.type = 'subtitle';
                     break;
                 }
-                /* if (!track.width || !track.height) {
+                if (!track.width || !track.height) {
                   track.width = array.slice(i+(1+3+4*5+8+2*4+36), i+(1+3+4*5+8+2*4+36+4-2)).reduce((total, i)=>total*256+i, 0) + array.slice(i+(1+3+4*5+8+2*4+36+4-2), i+(1+3+4*5+8+2*4+36+4)).reverse().reduce((total, i)=>total/256+i.toString(2).padStart(8, "0").match(/./g).reverse().reduce((total, i)=>total/2 + i/2, 0), 0);
                   track.height = array.slice(i+(1+3+4*5+8+2*4+36+4), i+(1+3+4*5+8+2*4+36+4+4-2)).reduce((total, i)=>total*256+i, 0) + array.slice(i+(1+3+4*5+8+2*4+36+4+4-2), i+(1+3+4*5+8+2*4+36+4+4)).reverse().reduce((total, i)=>total/256+i.toString(2).padStart(8, "0").match(/./g).reverse().reduce((total, i)=>total/2 + i/2, 0), 0);
-                } */
+                }
+              }*/
+              if (type == "hdlr") {
+                switch (String.fromCharCode(...array.slice(i+(1+3+4), i+(1+3+8)))) {
+                  case "vide":
+                    track.type = "video";
+                    break;
+                  case "soun":
+                    track.type = "sound";
+                    break;
+                  default:
+                    throw "Unknown track type";
+                }
               }
               if (type == "mdhd") {
                 track.timeScale = array.slice(i+(1+3+4*2), i+(1+3+4*3)).reduce((total, i)=>total*256+i, 0)/1000;
@@ -2339,17 +2436,27 @@
                   let codec = array.slice(i+(1+3+4+index), i+(1+3+4+index+4)).reduce((total, i)=>total+String.fromCharCode(i), "")
                   let description = {
                     codec: codec,
-                    referenceIndex: array.slice(i+(1+3+4+10+index), i+(1+3+4+10+index+2)).reduce((total, i)=>total*256+i, 0)
+                    referenceIndex: array.slice(i+(1+3+4+10+index), i+(1+3+4+10+index+2)).reduce((total, i)=>total*256+i, 0),
                   };
-                  index += 12;
-                  if (["mp4v", "avc1"].includes(codec)) {
-                    index += 16;
-                    //track.width = array.slice(i+(1+3+4+index), i+(1+3+4+index+2)).reduce((total, i)=>total*256+i, 0);
-                    index += 2;
-                    //track.height = array.slice(i+(1+3+4+index), i+(1+3+4+index+2)).reduce((total, i)=>total*256+i, 0);
-                    //console.log([array.slice(i+(1+3+4+index+2), i+(1+3+4+index+6)), array.slice(i+(1+3+4+index+6), i+(1+3+4+index+10))]);
-                    index += 52;
-                    let i2 = 1+3+4;
+                  if (codec == "mp4a") {
+                    description.version = array.slice(i+(1+3+4+12+index), i+(1+3+4+12+index+2)).reduce((total, i)=>total*256+i, 0);
+                    if (description.version == 0) {
+                      description.channels = array.slice(i+(1+3+4+20+index), i+(1+3+4+20+index+2)).reduce((total, i)=>total*256+i, 0);
+                      index += 32;
+                    } else if (description.version == 1) {
+                      description.channels = array.slice(i+(1+3+4+20+index), i+(1+3+4+20+index+2)).reduce((total, i)=>total*256+i, 0);
+                      index += 48;
+                    } else {
+                      description.channels = array.slice(i+(1+3+4+36+index), i+(1+3+4+36+index+4)).reduce((total, i)=>total*256+i, 0);
+                      index += 60;
+                    }
+                  } else if (["mp4v", "avc1"].includes(codec)) {
+                    index += 82;
+                  } else {
+                    index += 12;
+                  }
+                  if (["mp4v", "mp4a", "avc1"].includes(codec)) {
+                    var i2 = 1+3+4;
                     while (i2+index < size) {
                       let start = i2;
                       let len = array.slice(i+index+i2, i+index+i2+4).reduce((total, i)=>total*256+i,0);
@@ -2362,7 +2469,13 @@
                         i2 += 8;
                       }
                       if (type == "avcC") {
-                        description.AVCDecoderDescriptionRecord = array.slice(i+index+i2, i+index+start+len);
+                        description.AVCDecoderConfigurationRecord = array.slice(i+index+i2, i+index+start+len);
+                      }
+                      if (type == "colr") {
+                        console.log(array.slice(i+index+i2, i+index+start+len));
+                      }
+                      if (type == "esds") {
+                        description.elementaryStreamDescriptor = array.slice(i+index+i2+4, i+index+start+len);
                       }
                       i2 = start + len;
                     }
@@ -2448,7 +2561,7 @@
                 }
                 i = start + len;
               } else {
-                text = text + "  ".repeat(deep)+" "+type + "\n";
+                text = text + "  ".repeat(deep)+" "+type+" - "+len + "\n";
                 deep += 1;
                 indexes.push([-1, i]);
               }
@@ -2463,11 +2576,14 @@
           this.options[0].span = this.options[0].frames = [0, Math.ceil(main.fps.video * ((track)=>track.duration/track.timeScale)(tracks.find((track)=>track.type=="video")))];
           this.__preview.load();
         }
-        async decodeReady() {
-          this.chunks = [];
-          this.decoders = [];
-          this.frames = [];
-          this.decodedFrame = 0;
+        hasAudio() {
+          return this.tracks.some((track)=>track.type == "sound");
+        }
+        async decodeReady(context) {
+          this.decoders = {video: undefined, audio: undefined};
+          this.frames = {video: []};
+          this.audioDatas = [];
+          this.decodedFrame = {video: 0, audio: 0};
           for (let track of this.tracks) {
             if (track.type == "video") {
               try {
@@ -2530,7 +2646,7 @@
                 }
                 // Math.ceil(1000 * track.duration / track.timeScale)
               }
-              let decoder = new VideoDecoder({output:(frame)=>{this.frames.push(frame);}, error:(e)=>{throw e;}});
+              let decoder = new VideoDecoder({output:(frame)=>{this.frames.video.push(frame);}, error:(e)=>{throw e;}});
               console.log(track.codec);
               let config = {
                 codec: track.codec,
@@ -2539,50 +2655,175 @@
                 optimizeForLatency:track.optimizeForLatency
               };
               if (track.description.codec == "avc1") {
-                config.description = track.description.AVCDecoderDescriptionRecord;
+                console.log(track.description.AVCDecoderConfigurationRecord)
+                config.description = track.description.AVCDecoderConfigurationRecord;
                 config.codec = "avc1."+config.description[1].toString(16).padStart(2, "0")+config.description[2].toString(16).padStart(2, "0")+config.description[3].toString(16).padStart(2, "0")
               }
               decoder.configure(config);
-              this.decoders.push(decoder);
+              this.decoders.video = decoder;
               /* setTimeout(()=>{console.log(this);}, 100);
               for (let chunk of track.chunks) {
                 decoder.decode(chunk);
                 this.chunks.push(chunk);
               } */
+            } else if (track.type == "sound") {
+              try {
+                track.description = track.sampleDescriptions.find((value)=>["mp4a"].includes(value.codec));
+                track.codec = track.description.codec;
+                console.log(track.codec);
+              } catch { continue; }
+              if (["mp4a"].includes(track.codec)) {
+                track.codec += ".40";
+              }
+              track.chunks = [];
+              if (track.sampleSize.length == 1) {
+                let sampleSize = track.sampleSize[0];
+                track.sampleSize = [];
+                let entrylen = track.timeToSample.reduce((total, i)=>total+i.count, 0);
+                for (let entry=0; entry < entrylen; entry++) {
+                  track.sampleSize.push(sampleSize);
+                }
+              }
+              let timestamp = track.timestamp;
+              for (let i=0; i < track.chunkOffset.length; i++) {
+                let samplePos = [0, 0];
+                let durations = [];
+                for (let index = 0; index < i+1; index++) {
+                  let len = track.sampleToChunk.reduce((total, i)=>total*(i.first > index+1)+i.samplesPerChunk*(i.first <= index+1), 0);
+                  samplePos[0] += len;
+                  samplePos[1] = len;
+                }
+                samplePos[0] -= samplePos[1]
+                let samplelen = 0;
+                for (let index = 0; index < track.timeToSample.length; index++) {
+                  //console.log(track.timeToSample.at(index));
+                  for (let sample = Math.max(samplelen, samplePos[0]); sample < samplePos[0]+samplePos[1]; sample++) {
+                    durations.push(track.timeToSample.at(index).duration);
+                  }
+                  samplelen += track.timeToSample.at(index).count;
+                }
+                //let len = new Uint8Array(this.arrayBuffer.slice(track.chunkOffset[i], track.chunkOffset[i]+4)).reduce((total, i)=>total*256+i, 0);
+                if (i == 0) {console.log(samplePos)}
+                let sizes = track.sampleSize.slice(samplePos[0], samplePos[0]+samplePos[1]);
+                let len = sizes.reduce((total, i)=>total+i, 0);
+                //console.log(samplePos);
+                let offset = 0;
+                let sample = samplePos[0]+1;
+                for (let size of sizes) {
+                  track.chunks.push(new EncodedAudioChunk({
+                    type: "key",
+                    data: this.arrayBuffer.slice(track.chunkOffset[i]+offset, track.chunkOffset[i]+offset+size),
+                    timestamp: Math.floor(timestamp * 1000 / track.timeScale),
+                    duration: Math.floor(durations[0] * 1000 / track.timeScale)
+                  }));
+                  timestamp += durations.splice(0, 1)[0] / track.timeScale;
+                  sample += 1;
+                  offset += size;
+                }
+                // Math.ceil(1000 * track.duration / track.timeScale)
+              }
+              let decoder = new AudioDecoder({output:(audiodata)=>{this.audioDatas.push(audiodata);}, error:(e)=>{throw e;}});
+              let config = {
+                codec: track.codec,
+                sampleRate: track.timeScale * 1000,
+                numberOfChannels: track.description.channels || 1,
+                hardwareAcceleration:track.hardwareAcceleration,
+                optimizeForLatency:track.optimizeForLatency,
+              };
+              if (track.description.elementaryStreamDescriptor != undefined) {
+                let description = track.description.elementaryStreamDescriptor;
+                var index = 0;
+                if (description[index] == 3) {
+                  index += 4;
+                  index += 2 * (description[index] >>> 5);
+                  index += 1;
+                  if (description[index] == 4) {
+                    index += 2;
+                    if (description[index] == 0x40 && (description[index+1] >>> 2) == 0x05) {
+                      // AAC
+                      index += 2 + 3 + 4 + 4;
+                      if (description[index] == 0x05) {
+                        index += 2;
+                        config.codec += "." + (description[index] >>> 3);
+                      }
+                    }
+                  }
+                }
+              }
+              console.log(config.codec);
+              decoder.configure(config);
+              this.decoders.audio = decoder;
+              this.ctx = context;
             }
           }
         }
         async getFrame(frame) {
-          let track = this.tracks.find((track)=>track.type=="video"&&track.description!=undefined);
-          if (frame <= this.decodedFrame) {
-            await this.decoders[0].flush();
-            this.frames.forEach((i)=>i.close());
-            this.frames = [];
-            this.__curChunk = 0;
-            this.decodedFrame = 0;
+          let track = this.tracks.find((track)=>track.type=="video" && track.description!=undefined);
+          if (frame <= this.decodedFrame.video) {
+            await this.decoders.video.flush();
+            this.frames.video.forEach((i)=>i.close());
+            this.frames.video = [];
+            this.__curVideoChunk = 0;
+            this.decodedFrame.video = 0;
           }
-          while (this.frames.reduce((total, i)=>total+(i.duration / (1000 ** 2)) * main.fps.video, this.decodedFrame) / this.options[0].timeScale <= frame || (track.chunks.length > this.__curChunk+1 && track.chunks.at(this.__curChunk+1).type != "key")) {
-            let chunk = track.chunks.at(this.__curChunk);
-            this.__curChunk += 1;
+          while (this.frames.video.reduce((total, i)=>total+(i.duration / (1000 ** 2)) * main.fps.video, this.decodedFrame.video) / this.options[0].timeScale <= frame || (track.chunks.length > this.__curVideoChunk+1 && track.chunks.at(this.__curVideoChunk+1).type != "key")) {
+            let chunk = track.chunks.at(this.__curVideoChunk);
+            this.__curVideoChunk += 1;
             if (chunk) {
-              this.decoders[0].decode(chunk);
+              this.decoders.video.decode(chunk);
             } else {
               break;
             }
-            if (track.chunks.length <= this.__curChunk || track.chunks.at(this.__curChunk).type == "key") {
-              await this.decoders[0].flush();
+            if (track.chunks.length <= this.__curVideoChunk || track.chunks.at(this.__curVideoChunk).type == "key") {
+              await this.decoders.video.flush();
             }
           }
-          while (this.frames.length > 0 && ((this.frames[0].duration / (1000 ** 2)) * main.fps.video + this.decodedFrame) / this.options[0].timeScale < frame) {
-            for (let i of this.frames.splice(0, 1)) {
-              this.decodedFrame += (i.duration / (1000 ** 2)) * main.fps.video;
+          while (this.frames.video.length > 0 && ((this.frames.video[0].duration / (1000 ** 2)) * main.fps.video + this.decodedFrame.video) / this.options[0].timeScale < frame) {
+            for (let i of this.frames.video.splice(0, 1)) {
+              this.decodedFrame.video += (i.duration / (1000 ** 2)) * main.fps.video;
               i.close();
             }
-            if (this.frames.length == 0) {
+            if (this.frames.video.length == 0) {
               break;
             }
           }
-          return this.frames.at(0);
+          return this.frames.video.at(0);
+        }
+        async getAudioNode() {
+          this.audioBuffers = [];
+          let track = this.tracks.find((track)=>track.type=="sound" && track.description!=undefined);
+          for (let chunk of track.chunks) {
+            this.decoders.audio.decode(chunk);
+          }
+          let promise = new Promise((resolve, reject)=>{
+            this.decoders.audio.addEventListener("dequeue", ()=>{
+              if (this.decoders.audio.decodeQueueSize == 0) {
+                resolve();
+              }
+            })
+          })
+          await this.decoders.audio.flush();
+          for (let audioData of this.audioDatas) {
+            let audioBuffer = new AudioBuffer({
+              length: audioData.duration * audioData.sampleRate / 1000,
+              numberOfChannels: audioData.numberOfChannels,
+              sampleRate: audioData.sampleRate,
+            });
+            for (let ch=0; ch < audioData.numberOfChannels; ch++) {
+              let buffer = new Float32Array(Math.round(audioData.allocationSize({planeIndex: ch}) / 4));
+              audioData.copyTo(buffer, {planeIndex: ch});
+              audioBuffer.copyToChannel(buffer, ch);
+            }
+            this.audioBuffers.push(audioBuffer);
+          }
+          let audioBuffersNode = new MultipleAudioBuffersSourceNode(
+            this.ctx,
+            this.audioBuffers,
+            {
+              channelCountMode: "max"
+            }
+          );
+          return audioBuffersNode;
         }
         static async getSourceFromFileHandle(fileHandle) {
           if (!FileSystemFileHandle.prototype.isPrototypeOf(fileHandle)) {
@@ -2624,7 +2865,19 @@
             });
           });
         }
+        hasAudio() {
+          return true;
+        }
         async decodeReady(ctx) {
+          this.ctx = ctx;
+        }
+        async getAudioNode() {
+          return AudioBufferSourceNode(
+            this.ctx,
+            {
+              buffer: this.audioBuffer
+            }
+          );
         }
         static async getSourceFromFileHandle(fileHandle) {
           if (!FileSystemFileHandle.prototype.isPrototypeOf(fileHandle)) {
@@ -2796,9 +3049,18 @@
           dummy.remove();
           this.width = rect.width;
           this.height = rect.height;
-          this.aspect.begin = this.aspect.end = this.width / this.height;
-          this.options[0].width.begin = this.options[0].width.end = this.width;
-          this.options[0].height.begin = this.options[0].height.end = this.height;
+          this.aspect.begin = this.width / this.height;
+          this.options[0].width.begin = this.width;
+          this.options[0].height.begin = this.height;
+
+          dummy.style.fontSize = this.options[0].fontSize.end + "px";
+          dummy.style.lineHeight = (this.options[0].lineHeight.end || this.options[0].fontSize.end*1.5) + "px";
+          document.body.appendChild(dummy);
+          rect = dummy.getBoundingClientRect();
+          dummy.remove();
+          this.aspect.end = rect.width / rect.height;
+          this.options[0].width.end = rect.width;
+          this.options[0].height.end = rect.height;
         }
         setupDetail() {
           super.setupDetail();
@@ -2932,12 +3194,16 @@
           this.__svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
           let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.textContent = this.options[0].text;
+          text.innerHTML = text.innerHTML.replaceAll("\n", "<tspan x=\"0\" dy=\"1em\"></tspan>");
           text.setAttribute("dominant-baseline", "text-before-edge");
           this.__svg.appendChild(text);
-          this.__svg.setAttribute("viewBox", "0 0 "+this.width+" "+this.height);
           this.__svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         }
         async getFrame(frame) {
+          if (this.options[0].width.curValue < 1 || this.options[0].height.curValue < 1) {
+            return;
+          }
+          this.__svg.setAttribute("viewBox", "0 0 "+this.options[0].width.curValue+" "+this.options[0].height.curValue);
           this.__svg.setAttribute("width", this.options[0].width.curValue+"px");
           this.__svg.setAttribute("height", this.options[0].height.curValue+"px");
           this.__svg.children[0].setAttribute("fill", "#"+Math.round(this.options[0].colorR.curValue).toString(16).padStart(2, "0")+Math.round(this.options[0].colorG.curValue).toString(16).padStart(2, "0")+Math.round(this.options[0].colorB.curValue).toString(16).padStart(2, "0"));
@@ -3743,22 +4009,37 @@
               video: (options.codecs || {}).video || "avc1"
             }
           };
+          this.videoEncoderMetadata = {};
+          this.audioEncoderMetadata = {};
           this.ms = Math.max(...this.layers.map((layer)=>Math.max(...layer.map((src)=>src.options.at(-1).frames[1])))) / this.fps.video;
           this.encodedVideoChunks = [];
-          this.encoder = new VideoEncoder({
-            output: (chunk, metadata)=>this.handleEncodedChunk(chunk, metadata),
+          this.encodedAudioChunks = [];
+          this.videoEncoder = new VideoEncoder({
+            output: (chunk, metadata)=>this.handleEncodedVideoChunk(chunk, metadata),
             error: console.error
           });
-          this.encoder.configure({
+          this.videoEncoder.configure({
             codec:"avc1.42C029", //this.encoderOptions.codecs.video,
             width: this.size.width,
             height: this.size.height,
-            bitrate: 0.1*this.size.width*this.size.height*this.fps.video*12,
+            bitrateMode: "quantizer",
             framerate: this.fps.video,
             hardwareAcceleration: "prefer-hardware"
           });
+          this.audioEncoder = new AudioEncoder({
+            output: (chunk, metadata)=>this.handleEncodedAudioChunk(chunk, metadata),
+            error: console.error
+          });
+          this.audioEncoder.configure({
+            codec:"mp4a.40.2",
+            sampleRate: this.sampleRate,
+            numberOfChannels: this.isStereo?2:1,
+            opus: {
+              format: "ogg"
+            }
+          });
           let audioCtx = new OfflineAudioContext({
-            numberOfChannels: this.isStereo,
+            numberOfChannels: this.isStereo?2:1,
             length: Math.ceil(this.sampleRate * this.ms / 1000),
             sampleRate: this.sampleRate
           });
@@ -3766,7 +4047,7 @@
           let promises = [];
           for (let layer of this.layers) {
             for (let src of layer) {
-              if (AudioSource.prototype.isPrototypeOf(src)) {
+              if (src.hasAudio()) {
                 promises.push(src.decodeReady(audioCtx));
               } else {
                 promises.push(src.decodeReady());
@@ -3774,6 +4055,7 @@
             }
           }
           await Promise.all(promises);
+          // handle audio first, process in background
           console.log(promises);
           let timings = [];
           let handlingSources = new Map();
@@ -3781,9 +4063,23 @@
             let timing = [];
             for (let src of layer) {
               timing.push([...src.options[0].frames, src]);
+              if (src.hasAudio()) {
+                let node = await src.getAudioNode();
+                if (AudioBufferSourceNode.prototype.isPrototypeOf(node)) {
+                  node.start(src.options[0].frames[0] / (this.fps.video * 1000), src.options[0].span[0] / (this.fps.video * 1000), src.options[0].frames[1] / (this.fps.video * 1000));
+                } else if (AudioScheduledSourceNode.prototype.isPrototypeOf(node)) {
+                  node.start(src.options[0].frames[0] / (this.fps.video * 1000));
+                  node.stop(src.options[0].frames[1] / (this.fps.video * 1000));
+                } else {
+                  console.warn("unsupported AudioNode instance:", node);
+                }
+              }
             }
             timings.push(timing);
           }
+          let audioPromise = audioCtx.startRendering();
+          console.log("start audio encoding in background");
+          console.log("start video encoding");
           console.log(timings);
           let curFrame = 0;
           while (this.ms > curFrame * 1000 / this.fps.video) {
@@ -3854,7 +4150,6 @@
                     });
                     break;
                 }
-                data.close();
                 //console.time("scale");
                 let displayWidth = Math.round(src.options[0].width.curValue);
                 let displayHeight = Math.round(src.options[0].height.curValue);
@@ -3926,6 +4221,7 @@
                     }
                   })(displayWidth,displayHeight, data.displayWidth, data.displayHeight)]);
                 }
+                data.close();
                 //console.timeEnd("scale");
                 //console.time("rotate");
                 let cosA = Math.cos((src.options[0].rotate.curValue || 0) * 2 * Math.PI / 360);
@@ -4031,45 +4327,61 @@
               }
             }
             let result = new VideoFrame(monitor, {format:"RGBA", codedWidth:this.size.width, codedHeight:this.size.height, colorSpace:new VideoColorSpace(), timestamp:(curFrame/this.fps.video)*1000});
-            console.log(result);
+            console.log(result.allocationSize(), result);
             try {
-              this.encoder.encode(result);
+              this.videoEncoder.encode(result);
             } catch(e) {
               console.error(e);
             }
-            result.close();
             curFrame += 1;
           }
-          this.encoder.addEventListener("dequeue", (e)=>{
-            if (this.encoder.encodeQueueSize == 0) {
+          this.videoEncoder.addEventListener("dequeue", (e)=>{
+            if (this.videoEncoder.encodeQueueSize == 0) {
               setTimeout(()=>{
-                this.encoder.close();
-                console.log("encode finished.");
+                this.videoEncoder.close();
+                console.log("video encode finished.");
+                audioPromise.then((audioBuffer)=>{
+                  var totalBuffer = new Float32Array(audioBuffer.length * audioBuffer.numberOfChannels);
+                  for (let ch=0; ch < audioBuffer.numberOfChannels; ch++) {
+                    let buffer = audioBuffer.getChannelData(ch);
+                    totalBuffer.set(buffer, audioBuffer.length * ch);
+                  }
+                  let audioData = new AudioData({
+                    format: "f32",
+                    sampleRate: audioBuffer.sampleRate,
+                    numberOfFrames: audioBuffer.length,
+                    numberOfChannels: audioBuffer.numberOfChannels,
+                    data: totalBuffer,
+                    timestamp: 0
+                  });
+                  this.audioEncoder.encode(audioData);
+                  this.audioEncoder.flush();
+                }).catch(console.error);
+              }, 100);
+            }
+          });
+          this.audioEncoder.addEventListener("dequeue", (e)=>{
+            if (this.audioEncoder.encodeQueueSize == 0) {
+              setTimeout(()=>{
+                this.audioEncoder.close();
+                console.log("audio encode finished.");
                 this.generateOutputVideo().catch(console.error);
               }, 100);
             }
           });
-          this.encoder.flush();
+          this.videoEncoder.flush();
         }
 
-        handleEncodedChunk(chunk, metadata) {
+        handleEncodedVideoChunk(chunk, metadata) {
           this.encodedVideoChunks.push(chunk);
+          console.log("metadata: ", metadata);
+          this.videoEncoderMetadata = {...this.videoEncoderMetadata, ...metadata};
         }
 
-        convertIntToArray(value, length) {
-          let result = [];
-          for (let i=length-1; i >=0; i--) {
-            result.push((value >>> i) & 0xff);
-          }
-          return result;
-        }
-
-        convertBigIntToArray(value, length) {
-          let result = [];
-          for (let i=BigInt(length-1); i >=0n; i-=1n) {
-            result.push(parseInt((value >> i) & 0xffn));
-          }
-          return result;
+        handleEncodedAudioChunk(chunk, metadata) {
+          this.encodedAudioChunks.push(chunk);
+          console.log("metadata: ", metadata);
+          this.audioEncoderMetadata = {...this.audioEncoderMetadata, ...metadata};
         }
 
         async generateOutputVideo() {
@@ -4078,13 +4390,14 @@
             outputVideoFile = await window.showSaveFilePicker({
               suggestedName: "output.mp4"
             });
-          } catch {
+          } catch (error) {
+            console.log(error);
             return;
           }
           var outputBoxes = [];
-          let creationTime = this.convertIntToArray(Math.floor((new Date() - new Date("1904-01-01 00:00:00")) / 1000), 4);
+          let creationTime = convertIntToArray(Math.floor((new Date() - new Date("1904-01-01 00:00:00")) / 1000), 4);
           let modificationTime = [...creationTime];
-          let duration = this.convertIntToArray(Math.ceil(this.ms / 1000), 4);
+          let duration = convertIntToArray(Math.ceil(this.ms*this.fps.video), 4);
           if (true) {
             outputBoxes.push(new MP4Box("ftyp"));
             outputBoxes.push(new MP4Box("moov"));
@@ -4125,9 +4438,9 @@
             outputBoxes[1].child[0].child.set([0, 0, 0], 1);
             outputBoxes[1].child[0].child.set(creationTime, 4);
             outputBoxes[1].child[0].child.set(modificationTime, 8);
-            outputBoxes[1].child[0].child.set([0, 0, 0, 1], 12);
-            outputBoxes[1].child[0].child.set(duration, 16);
-            outputBoxes[1].child[0].child.set([0, 0, 0, 1], 20);
+            outputBoxes[1].child[0].child.set(convertIntToArray(this.fps.video*1000, 4), 12);
+            outputBoxes[1].child[0].child.set(convertIntToArray(Math.ceil(this.ms*this.fps.video), 4), 16);
+            outputBoxes[1].child[0].child.set([0, 1, 0, 0], 20);
             outputBoxes[1].child[0].child.set([1, 0], 24);
             outputBoxes[1].child[0].child.set([
               [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
@@ -4144,12 +4457,16 @@
             // 謎の 10 bytes が余った...
 
             let tracks = [];
-            tracks.push({});
+            tracks.push({
+              type: "video"
+            }, {
+              type: "audio"
+            });
             var trackId = [0, 0, 0, 1];
             var layerId = [0, 0];
             for (let track of tracks) {
               let tr = new MP4Box("trak");
-              let trackTimeScale = this.convertIntToArray(this.fps.video*1000, 4);
+              let trackTimeScale = convertIntToArray((track.type=="video")?(this.fps.video*1000):this.sampleRate, 4);
               outputBoxes[1].child.push(tr);
               tr.child = [
                 new MP4Box("tkhd"),
@@ -4157,7 +4474,7 @@
               ];
               tr.child[0].child = new Uint8Array(84);
               tr.child[0].child.set([0], 0);
-              tr.child[0].child.set([0, 0, 0], 1);
+              tr.child[0].child.set([0, 0, 1], 1);
               tr.child[0].child.set(creationTime, 4);
               tr.child[0].child.set(modificationTime, 8);
               tr.child[0].child.set(trackId, 12);
@@ -4168,9 +4485,13 @@
               tr.child[0].child.set([0, 0], 34);
               tr.child[0].child.set([1, 0], 36);
               // 2 bytes reserved
-              // 36 bytes Matrix structure
-              tr.child[0].child.set(this.convertIntToArray(this.size.width, 4), 76);
-              tr.child[0].child.set(this.convertIntToArray(this.size.height, 4), 80);
+              tr.child[0].child.set([
+                [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+                [0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0],
+                [0, 0, 0, 0], [0, 0, 0, 0], [0, 1, 0, 0]
+              ].flat(), 40)// 36 bytes Matrix structure
+              tr.child[0].child.set(convertIntToArray(this.size.width, 4), 76);
+              tr.child[0].child.set(convertIntToArray(this.size.height, 4), 80);
 
               tr.child[1].child = [
                 new MP4Box("mdhd"),
@@ -4185,19 +4506,19 @@
               tr.child[1].child[0].child.set([0, 0], 20); // 0: English, 10: Japanese
               tr.child[1].child[0].child.set([0, 0], 22); // playback quality???
 
-              let componentName = "vedit VideoHandler"
-              tr.child[1].child[1].child = new Uint8Array(24+componentName.length);
+              let componentName = track.type=="video"?"vedit VideoHandler":"vedit AudioHandler";
+              tr.child[1].child[1].child = new Uint8Array(24+componentName.length+1);
               tr.child[1].child[1].child.set([0], 0);
               tr.child[1].child[1].child.set([0, 0, 0], 1);
               tr.child[1].child[1].child.set([0, 0, 0, 0], 4);
-              tr.child[1].child[1].child.set([..."vide"].map((ch)=>ch.charCodeAt(0)), 8);
+              tr.child[1].child[1].child.set([...(track.type=="video"?"vide":"soun")].map((ch)=>ch.charCodeAt(0)), 8);
               tr.child[1].child[1].child.set([0, 0, 0, 0], 12);
               tr.child[1].child[1].child.set([0, 0, 0, 0], 16);
               tr.child[1].child[1].child.set([0, 0, 0, 0], 20);
               tr.child[1].child[1].child.set([...componentName].map((ch)=>ch.charCodeAt(0)), 24);
 
               tr.child[1].child[2].child = [
-                new MP4Box("vmhd"),
+                new MP4Box(track.type=="video"?"vmhd":"smhd"),
                 new MP4Box("dinf"),
                 new MP4Box("stbl")
               ];
@@ -4215,121 +4536,247 @@
               let stbl = tr.child[1].child[2].child[2];
 
               stbl.child = [
-                new MP4Box("stsd"),
+                new MP4Box("stsd", true),
                 new MP4Box("stts"),
                 new MP4Box("stsc"),
                 new MP4Box("stco"),
                 new MP4Box("stsz"),
-                new MP4Box("stss")
               ];
 
-              stbl.child[0].child = [
-                new Uint8Array(8),
-                new MP4Box("avc1")
-              ];
+              if (track.type == "video") {
+                // video
+                stbl.child.push(new MP4Box("stss"));
+                stbl.child[0].child = [
+                  new Uint8Array(8),
+                  new MP4Box("avc1", true),
+                ];
 
-              stbl.child[0].child[0].set([0], 0);
-              stbl.child[0].child[0].set([0, 0, 0], 1);
-              stbl.child[0].child[0].set([0, 0, 0, 1], 4);
-              
-              stbl.child[0].child[1].child = [
-                new Uint8Array(78),
-                new MP4Box("avcC")
-              ];
+                stbl.child[0].child[0].set([0], 0);
+                stbl.child[0].child[0].set([0, 0, 0], 1);
+                stbl.child[0].child[0].set([0, 0, 0, 1], 4);
+                
+                stbl.child[0].child[1].child = [
+                  new Uint8Array(78),
+                  new MP4Box("avcC")
+                ];
 
-              // 6 bytes reserved
-              stbl.child[0].child[1].child[0].set([0, 1], 6);
-              stbl.child[0].child[1].child[0].set([0, 0], 8);
-              stbl.child[0].child[1].child[0].set([0, 0], 10);
-              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 12);
-              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 16);
-              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 20);
-              stbl.child[0].child[1].child[0].set(this.convertIntToArray(this.size.width, 2), 24);
-              stbl.child[0].child[1].child[0].set(this.convertIntToArray(this.size.height, 2), 26);
-              stbl.child[0].child[1].child[0].set([0, 72, 0, 0], 28); // 72dpi
-              stbl.child[0].child[1].child[0].set([0, 72, 0, 0], 32); // 72dpi
-              stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 36);
-              stbl.child[0].child[1].child[0].set([0, 1], 40);
-              // 32 bytes of Compressor name (skip)
-              stbl.child[0].child[1].child[0].set([0, 24], 74);
-              stbl.child[0].child[1].child[0].set([255, 255], 76); // 0xffff -> -0x0001
-              
-              
-              
-              
-              
-              
+                // 6 bytes reserved
+                stbl.child[0].child[1].child[0].set([0, 1], 6);
+                stbl.child[0].child[1].child[0].set([0, 0], 8);
+                stbl.child[0].child[1].child[0].set([0, 0], 10);
+                stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 12);
+                stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 16);
+                stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 20);
+                stbl.child[0].child[1].child[0].set(convertIntToArray(this.size.width, 2), 24);
+                stbl.child[0].child[1].child[0].set(convertIntToArray(this.size.height, 2), 26);
+                stbl.child[0].child[1].child[0].set([0, 72, 0, 0], 28); // 72dpi
+                stbl.child[0].child[1].child[0].set([0, 72, 0, 0], 32); // 72dpi
+                stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 36);
+                stbl.child[0].child[1].child[0].set([0, 1], 40);
+                // 32 bytes of Compressor name (skip)
+                stbl.child[0].child[1].child[0].set([0, 24], 74);
+                stbl.child[0].child[1].child[0].set([255, 255], 76); // 0xffff -> -0x0001
+                
+                /*let avcDecoderConfigurationRecord = new AVCDecoderConfigurationRecord(
+                  {}
+                );*/
 
-              stbl.child[1].child = new Uint8Array(16);
-              stbl.child[1].child.set([0], 0);
-              stbl.child[1].child.set([0, 0, 0], 1);
-              stbl.child[1].child.set([0, 0, 0, 1], 4);
-              stbl.child[1].child.set([...this.convertIntToArray(this.encodedVideoChunks.length, 4), ...this.convertIntToArray(1000)], 8);
-
-              let stsc_entries = [];
-              var stsc_chunkIndex = 0;
-              for (let i = 0; i < this.encodedVideoChunks.length; i++) {
-                if (this.encodedVideoChunks[i].type == "delta") {
-                  stsc_entries.at(-1)[1]++;
+                if (this.videoEncoderMetadata.decoderConfig != undefined && this.videoEncoderMetadata.decoderConfig.description != undefined) {
+                  stbl.child[0].child[1].child[1].child = new Uint8Array(this.videoEncoderMetadata.decoderConfig.description);
                 } else {
-                  stsc_chunkIndex++;
-                  if (stsc_entries.length > 1 && stsc_entries.at(-1)[1] == stsc_entries.at(-2)[1]) {
-                    stsc_entries.at(-1)[0] = stsc_chunkIndex;
-                    stsc_entries.at(-1)[1] = 0;
-                  } else {
-                    stsc_entries.push([stsc_chunkIndex, 1, 1])
+                  throw "No description";
+                }
+
+                if (this.videoEncoderMetadata.decoderConfig != undefined && this.videoEncoderMetadata.decoderConfig.colorSpace != undefined) {
+                  let colr = new MP4Box("colr");
+                  stbl.child[0].child[1].child.push(colr);
+
+                  colr.child = new Uint8Array(10);
+                  colr.child.set([..."nclc"].map((ch)=>ch.charCodeAt(0)), 0);
+
+                  if (this.videoEncoderMetadata.decoderConfig.colorSpace.primaries == "bt709") {
+                    colr.child.set([0, 1], 4);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.primaries == "bt470bg") {
+                    colr.child.set([0, 5], 4);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.primaries == "smpte170m") {
+                    colr.child.set([0, 6], 4);
+                  }
+
+                  if (this.videoEncoderMetadata.decoderConfig.colorSpace.transfer == "bt709") {
+                    colr.child.set([0, 1], 6);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.transfer == "smpte170m") {
+                    colr.child.set([0, 6], 6);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.transfer == "iec61966-2-1") {
+                    colr.child.set([0, 13], 6);
+                  }
+
+                  if (this.videoEncoderMetadata.decoderConfig.colorSpace.matrix == "rgb") {
+                    colr.child.set([0, 1], 8);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.matrix == "bt709") {
+                    colr.child.set([0, 1], 8);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.matrix == "bt470bg") {
+                    colr.child.set([0, 5], 8);
+                  } else if (this.videoEncoderMetadata.decoderConfig.colorSpace.matrix == "smpte170m") {
+                    colr.child.set([0, 6], 8);
                   }
                 }
-              }
-              stbl.child[2].child = new Uint8Array(8 + 12*stsc_entries.length);
-              stbl.child[2].child.set([0], 0);
-              stbl.child[2].child.set([0, 0, 0], 1);
-              stbl.child[2].child.set(this.convertIntToArray(stsc_entries.length), 4);
-              stbl.child[2].child.set(stsc_entries.flat().map((i)=>this.convertIntToArray(i, 4)).flat(), 8);
 
-              track.chunkSize = this.encodedVideoChunks.filter((chunk)=>chunk.type=="key").length;
+                stbl.child[1].child = new Uint8Array(16);
+                stbl.child[1].child.set([0], 0);
+                stbl.child[1].child.set([0, 0, 0], 1);
+                stbl.child[1].child.set([0, 0, 0, 1], 4);
+                stbl.child[1].child.set([...convertIntToArray(this.encodedVideoChunks.length, 4), ...convertIntToArray(1000, 4)], 8);
 
-              track.stco = stbl.child[3];
-              stbl.child[3].child = new Uint8Array(8 + track.chunkSize*8);
-              stbl.child[3].child.set([0], 0);
-              stbl.child[3].child.set([0, 0, 0], 1);
-              stbl.child[3].child.set(this.convertIntToArray(track.chunkSize, 4), 4);
-              // 実際のオフセットはまだ確定できないからスキップ
+                let stsc_entries = [];
+                var stsc_chunkIndex = 0;
+                for (let i = 0; i < this.encodedVideoChunks.length; i++) {
+                  if (this.encodedVideoChunks[i].type == "delta") {
+                    stsc_entries.at(-1)[1]++;
+                  } else {
+                    stsc_chunkIndex++;
+                    if (stsc_entries.length > 1 && stsc_entries.at(-1)[1] == stsc_entries.at(-2)[1]) {
+                      stsc_entries.at(-1)[0] = stsc_chunkIndex;
+                      stsc_entries.at(-1)[1] = 0;
+                    } else {
+                      stsc_entries.push([stsc_chunkIndex, 1, 1])
+                    }
+                  }
+                }
+                
+                stbl.child[2].child = new Uint8Array(8 + 12*stsc_entries.length);
+                stbl.child[2].child.set([0], 0);
+                stbl.child[2].child.set([0, 0, 0], 1);
+                stbl.child[2].child.set(convertIntToArray(stsc_entries.length, 4), 4);
+                stbl.child[2].child.set(stsc_entries.flat().map((i)=>convertIntToArray(i, 4)).flat(), 8);
 
-              if (this.encodedVideoChunks.some((chunk)=>chunk.byteLength!=this.encodedVideoChunks[0].byteLength)){
-                stbl.child[4].child = new Uint8Array(12 + this.encodedVideoChunks.length * 8);
-                stbl.child[4].child.set([0], 0);
-                stbl.child[4].child.set([0, 0, 0], 1);
-                stbl.child[4].child.set(this.convertIntToArray(this.encodedVideoChunks.length, 4), 4);
-                for (let i=0; i < this.encodedVideoChunks.length; i++) {
-                  stbl.child[4].child.set(this.convertIntToArray(this.encodedVideoChunks[i].byteLength, 4), 8+8*i);
-                  stbl.child[4].child.set(this.convertIntToArray(i+1, 4), 12+8*i);
+                track.chunkSize = this.encodedVideoChunks.filter((chunk)=>chunk.type=="key").length;
+
+                track.stco = stbl.child[3];
+                stbl.child[3].child = new Uint8Array(8 + track.chunkSize*8);
+                stbl.child[3].child.set([0], 0);
+                stbl.child[3].child.set([0, 0, 0], 1);
+                stbl.child[3].child.set(convertIntToArray(track.chunkSize, 4), 4);
+                // 実際のオフセットはまだ確定できないからスキップ
+
+                if (this.encodedVideoChunks.some((chunk)=>chunk.byteLength!=this.encodedVideoChunks[0].byteLength)){
+                  stbl.child[4].child = new Uint8Array(12 + this.encodedVideoChunks.length * 4);
+                  stbl.child[4].child.set([0], 0);
+                  stbl.child[4].child.set([0, 0, 0], 1);
+                  stbl.child[4].child.set(convertIntToArray(this.encodedVideoChunks.length, 4), 8);
+                  for (let i=0; i < this.encodedVideoChunks.length; i++) {
+                    stbl.child[4].child.set(convertIntToArray(this.encodedVideoChunks[i].byteLength, 4), 12+i*4);
+                  }
+                } else {
+                  stbl.child[4].child = new Uint8Array(12);
+                  stbl.child[4].child.set([0], 0);
+                  stbl.child[4].child.set([0, 0, 0], 1);
+                  stbl.child[4].child.set(convertIntToArray(this.encodedVideoChunks[0].byteLength, 4), 4);
+                }
+
+                let keyChunks = [];
+                this.encodedVideoChunks.forEach((chunk, index)=>{
+                  if (chunk.type == "key") {
+                    keyChunks.push(index+1);
+                  }
+                });
+                stbl.child[5].child = new Uint8Array(8 + keyChunks.length * 4);
+                stbl.child[5].child.set([0], 0);
+                stbl.child[5].child.set([0, 0, 0], 1);
+                stbl.child[5].child.set(convertIntToArray(keyChunks.length, 4), 4);
+                for (let i=0; i < keyChunks.length; i++) {
+                  stbl.child[5].child.set(convertIntToArray(keyChunks[i], 4), 8+4*i);
                 }
               } else {
-                stbl.child[4].child = new Uint8Array(12);
-                stbl.child[4].child.set([0], 0);
-                stbl.child[4].child.set([0, 0, 0], 1);
-                stbl.child[4].child.set([0, 0, 0, 0], 4);
-              }
+                // audio
+                stbl.child[0].child = [
+                  new Uint8Array(8),
+                  new MP4Box("mp4a", true)
+                ];
 
-              let keyChunks = [];
-              this.encodedVideoChunks.forEach((chunk, index)=>{
-                if (chunk.type == "key") {
-                  keyChunks.push(index+1);
+                stbl.child[0].child[0].set([0], 0);
+                stbl.child[0].child[0].set([0, 0, 0], 1);
+                stbl.child[0].child[0].set([0, 0, 0, 1], 4);
+                
+                stbl.child[0].child[1].child = [
+                  new Uint8Array(78),
+                  new MP4Box("esds")
+                ];
+
+                // 6 bytes reserved
+                stbl.child[0].child[1].child[0].set([0, 1], 6);
+                stbl.child[0].child[1].child[0].set([0, 0], 8);
+                stbl.child[0].child[1].child[0].set([0, 0], 10);
+                stbl.child[0].child[1].child[0].set([0, 0, 0, 0], 12);
+                stbl.child[0].child[1].child[0].set([0, this.isStereo?2:1], 16);
+                stbl.child[0].child[1].child[0].set([0, 16], 18);
+                stbl.child[0].child[1].child[0].set([0, 0], 20);
+                stbl.child[0].child[1].child[0].set([0, 0], 22);
+                stbl.child[0].child[1].child[0].set([...convertIntToArray(this.sampleRate, 2), 0, 0], 24);
+                
+                if (this.videoEncoderMetadata.decoderConfig != undefined && this.videoEncoderMetadata.decoderConfig.description != undefined) {
+                  stbl.child[0].child[1].child[1].child = new Uint8Array([0, 0, 0, 0, ...new Uint8Array(this.videoEncoderMetadata.decoderConfig.description)]);
+                } else {
+                  throw "No description";
                 }
-              });
-              stbl.child[5].child = new Uint8Array(8 + keyChunks.length * 8);
-              stbl.child[5].child.set([0], 0);
-              stbl.child[5].child.set([0, 0, 0], 1);
-              stbl.child[5].child.set(this.convertIntToArray(keyChunks.length, 4), 4);
-              for (let i=0; i < keyChunks.length; i++) {
-                stbl.child[5].child.set(this.convertIntToArray(i+1, 4), 8+8*i);
-                stbl.child[5].child.set(this.convertIntToArray(keyChunks[i], 4), 12+8*i);
+
+                stbl.child[1].child = new Uint8Array(16);
+                stbl.child[1].child.set([0], 0);
+                stbl.child[1].child.set([0, 0, 0], 1);
+                stbl.child[1].child.set([0, 0, 0, 1], 4);
+                stbl.child[1].child.set([...convertIntToArray(this.encodedAudioChunks.length, 4), ...convertIntToArray(1000, 4)], 8);
+
+                let stsc_entries = [];
+                var stsc_chunkIndex = 0;
+                for (let i = 0; i < this.encodedAudioChunks.length; i++) {
+                  if (this.encodedAudioChunks[i].type == "delta") {
+                    stsc_entries.at(-1)[1]++;
+                  } else {
+                    stsc_chunkIndex++;
+                    if (stsc_entries.length > 1 && stsc_entries.at(-1)[1] == stsc_entries.at(-2)[1]) {
+                      stsc_entries.at(-1)[0] = stsc_chunkIndex;
+                      stsc_entries.at(-1)[1] = 0;
+                    } else {
+                      stsc_entries.push([stsc_chunkIndex, 1, 1])
+                    }
+                  }
+                }
+                
+                stbl.child[2].child = new Uint8Array(8 + 12*stsc_entries.length);
+                stbl.child[2].child.set([0], 0);
+                stbl.child[2].child.set([0, 0, 0], 1);
+                stbl.child[2].child.set(convertIntToArray(stsc_entries.length, 4), 4);
+                stbl.child[2].child.set(stsc_entries.flat().map((i)=>convertIntToArray(i, 4)).flat(), 8);
+
+                track.chunkSize = this.encodedAudioChunks.filter((chunk)=>chunk.type=="key").length;
+
+                track.stco = stbl.child[3];
+                stbl.child[3].child = new Uint8Array(8 + track.chunkSize*8);
+                stbl.child[3].child.set([0], 0);
+                stbl.child[3].child.set([0, 0, 0], 1);
+                stbl.child[3].child.set(convertIntToArray(track.chunkSize, 4), 4);
+                // 実際のオフセットはまだ確定できないからスキップ
+
+                if (this.encodedAudioChunks.some((chunk)=>chunk.byteLength!=this.encodedAudioChunks[0].byteLength)){
+                  stbl.child[4].child = new Uint8Array(12 + this.encodedAudioChunks.length * 4);
+                  stbl.child[4].child.set([0], 0);
+                  stbl.child[4].child.set([0, 0, 0], 1);
+                  stbl.child[4].child.set(convertIntToArray(this.encodedAudioChunks.length, 4), 8);
+                  for (let i=0; i < this.encodedVideoChunks.length; i++) {
+                    stbl.child[4].child.set(convertIntToArray(this.encodedAudioChunks[i].byteLength, 4), 12+i*4);
+                  }
+                } else {
+                  stbl.child[4].child = new Uint8Array(12);
+                  stbl.child[4].child.set([0], 0);
+                  stbl.child[4].child.set([0, 0, 0], 1);
+                  stbl.child[4].child.set(convertIntToArray(this.encodedAudioChunks[0].byteLength, 4), 4);
+                }
               }
             }
 
             let metaOffset = outputBoxes.reduce((total, box)=>total+box.getLength(), 0n);
-            let totalChunkSize = tracks.reduce((total, track)=>total+BigInt(track.chunkSize), 0n);
+            let totalChunkSize = this.encodedVideoChunks.reduce((total, chunk)=>total+BigInt(chunk.byteLength), 0n)
+              + this.encodedAudioChunks.reduce((total, chunk)=>total+BigInt(chunk.byteLength), 0n);
+            console.log(totalChunkSize);
             if (totalChunkSize > 0xffffffffn) {
               metaOffset += 8n;
             }
@@ -4340,34 +4787,54 @@
                 track.stco.child = new Uint8Array(8 + track.chunkSize*12);
                 track.stco.child.set([0], 0);
                 track.stco.child.set([0, 0, 0], 1);
-                track.stco.child.set(this.convertIntToArray(track.chunkSize, 4), 4);
+                track.stco.child.set(convertIntToArray(track.chunkSize, 4), 4);
               });
-              var chunkOffset = metaOffset;
+              var chunkOffset = metaOffset + 16n;
               tracks.forEach((track)=>{
-                if (true) {
+                if (track.type == "video") {
                   var k=0;
                   for (let i=0; i < this.encodedVideoChunks.length; i++) {
                     if (this.encodedVideoChunks[i].type == "key") {
-                      track.stco.child.set(this.convertBigIntToArray(chunkOffset, 8), 8 + k * 12);
-                      track.stco.child.set(this.convertIntToArray(k+1, 4), 16 + k * 12);
+                      track.stco.child.set(convertBigIntToArray(chunkOffset, 8), 8 + k * 12);
+                      track.stco.child.set(convertIntToArray(k+1, 4), 16 + k * 12);
                       k += 1;
                     }
                     chunkOffset += BigInt(this.encodedVideoChunks[i].byteLength);
+                  }
+                } else if (track.type == "audio") {
+                  var k=0;
+                  for (let i=0; i < this.encodedAudioChunks.length; i++) {
+                    if (this.encodedAudioChunks[i].type == "key") {
+                      track.stco.child.set(convertBigIntToArray(chunkOffset, 8), 8 + k * 12);
+                      track.stco.child.set(convertIntToArray(k+1, 4), 16 + k * 12);
+                      k += 1;
+                    }
+                    chunkOffset += BigInt(this.encodedAudioChunks[i].byteLength);
                   }
                 }
               });
             } else {
               var chunkOffset = metaOffset;
               tracks.forEach((track)=>{
-                if (true) {
+                if (track.type == "video") {
                   var k=0;
                   for (let i=0; i < this.encodedVideoChunks.length; i++) {
                     if (this.encodedVideoChunks[i].type == "key") {
-                      track.stco.child.set(this.convertBigIntToArray(chunkOffset, 4), 8 + k * 8);
-                      track.stco.child.set(this.convertIntToArray(k+1, 4), 8 + k * 8);
+                      console.log("chunkOffset", chunkOffset);
+                      track.stco.child.set(convertBigIntToArray(chunkOffset, 4), 8 + k * 4);
                       k += 1;
                     }
                     chunkOffset += BigInt(this.encodedVideoChunks[i].byteLength);
+                  }
+                } else if (track.type == "audio") {
+                  var k=0;
+                  for (let i=0; i < this.encodedAudioChunks.length; i++) {
+                    if (this.encodedAudioChunks[i].type == "key") {
+                      console.log("chunkOffset", chunkOffset);
+                      track.stco.child.set(convertBigIntToArray(chunkOffset, 4), 8 + k * 4);
+                      k += 1;
+                    }
+                    chunkOffset += BigInt(this.encodedAudioChunks[i].byteLength);
                   }
                 }
               });
@@ -4380,17 +4847,23 @@
               for (let binary of metaBinaries) {
                 await fileStream.write(binary);
               }
-              
+
               var dataHeader;
               if (totalChunkSize > 0xffffffffn) {
-                dataHeader = new Uint8Array([0, 0, 0, 1, ...[..."mdat"].map((ch)=>ch.charCodeAt(0)), ...this.convertBigIntToArray(totalChunkSize + 16n, 8)]);
+                dataHeader = new Uint8Array([0, 0, 0, 1, ...[..."mdat"].map((ch)=>ch.charCodeAt(0)), ...convertBigIntToArray(totalChunkSize + 16n, 8)]);
               } else {
-                dataHeader = new Uint8Array([...this.convertBigIntToArray(totalChunkSize + 8n, 4), ...[..."mdat"].map((ch)=>ch.charCodeAt(0))]);
+                dataHeader = new Uint8Array([...convertBigIntToArray(totalChunkSize + 8n, 4), ...[..."mdat"].map((ch)=>ch.charCodeAt(0))]);
               }
 
               await fileStream.write(dataHeader);
 
               for (let chunk of this.encodedVideoChunks) {
+                let buffer = new Uint8Array(chunk.byteLength);
+                chunk.copyTo(buffer);
+                await fileStream.write(buffer);
+              }
+
+              for (let chunk of this.encodedAudioChunks) {
                 let buffer = new Uint8Array(chunk.byteLength);
                 chunk.copyTo(buffer);
                 await fileStream.write(buffer);
