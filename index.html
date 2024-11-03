@@ -4852,7 +4852,9 @@
           }
 
           this.videoEncoder.flush().then(()=>{
-            this.videoEncoder.close();
+            try {
+              this.videoEncoder.close();
+            } catch {}
             while (this.generatedVideoFrames.length > 0) {
               this.generatedVideoFrames.pop().close();
             }
@@ -4874,7 +4876,9 @@
               });
               this.audioEncoder.encode(audioData);
               this.audioEncoder.flush().then(()=>{
-                this.audioEncoder.close();
+                try {
+                  this.audioEncoder.close();
+                } catch {}
                 console.log("audio encode finished.");
                 popup.querySelector("svg animateTransform[name=\"hook-anime\"]").addEventListener("repeatEvent", ()=>{
                   popup.querySelectorAll("svg g.src").forEach((g)=>{
