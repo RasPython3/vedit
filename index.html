@@ -4884,9 +4884,9 @@
                   popup.querySelector("svg animateTransform[name=\"hook-anime\"]").onrepeat = undefined;
                 }, {once: true});
                 this.generateOutputVideo(file).catch(console.error);
-              }).catch(console.error);
-            }).catch(console.error);
-          }).catch(console.error);
+              }).catch((e)=>{Prompts.Error(e.toString());console.error(e);});
+            }).catch((e)=>{Prompts.Error(e.toString());console.error(e);});
+          }).catch((e)=>{Prompts.Error(e.toString());console.error(e);});
         }
 
         handleEncodedVideoChunk(chunk, metadata) {
