@@ -1860,7 +1860,7 @@
             throw "file is not a file";
           }
           for (let i of this.#classes) {
-            let check = i.callback;
+            let check = i.check;
             let result;
             try {
               let result = check(file);
@@ -3006,7 +3006,12 @@
                   }
                 }
               }
+              if (config.codec == "mp4a.40") {
+                // 応急処置
+                config.codec = "mp4a.40.2";
+              }
               console.log(config.codec);
+              console.log(config, this);
               decoder.configure(config);
               this.decoders.audio = decoder;
               this.ctx = context;
@@ -3716,6 +3721,7 @@
             (document.querySelector(".timeline").clientWidth - document.querySelector(".layer-tips").clientWidth) * 1000 / this.timeScale
           );
           document.querySelector(".layers").style.width = "calc(var(--unit-length) * " + timelineWidth + " / 1000)";
+          document.querySelector(".layers").style.minWidth = "calc(var(--unit-length) * " + timelineWidth + " / 1000)";
           document.querySelector("input[name=\"time\"]").setAttribute("max", timelineWidth);
           this.timelineWidth = timelineWidth;
           return timelineWidth;
@@ -3882,7 +3888,7 @@
               this.pinchDelta.x += e.deltaX;
               this.pinchDelta.y += e.deltaY;
               this.pinchDelta.z += e.deltaZ;
-              this.changeTimeScale((1 - (this.pinchDelta.x + this.pinchDelta.y > 0) * 2)*(this.pinchDelta.x ** 2 + this.pinchDelta.y ** 2) ** 0.5);
+              this.changeTimeScale(1 - ((this.pinchDelta.x + this.pinchDelta.y > 0) * 2)*(this.pinchDelta.x ** 2 + this.pinchDelta.y ** 2) ** 0.5);
               this.pinchDelta = {x:0, y:0, z:0};
               this.__pinchTimeout = setTimeout(()=>{
                 delete this.__pinchTimeout;
@@ -4199,6 +4205,9 @@
                 });
                 req.open("GET", new URL("meta.json", this.dir));
                 req.overrideMimeType("application/json");
+                req.setRequestHeader("Pragma", "no-cache");
+                req.setRequestHeader("Cache-Control", "no-cache");
+                req.setRequestHeader("If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT");
                 req.send();
                 data = JSON.parse(await promise, (key, value)=>{
                   if (Object.isPrototypeOf(value) && value.as == "OptionValue") {
@@ -4268,6 +4277,9 @@
                     });
                     req.responseType = "arraybuffer";
                     req.open("GET", new URL(layer[index].path, this.dir));
+                    req.setRequestHeader("Pragma", "no-cache");
+                    req.setRequestHeader("Cache-Control", "no-cache");
+                    req.setRequestHeader("If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT");
                     req.send();
                     buffer = await promise;
                     console.log(req, buffer);
@@ -4367,6 +4379,7 @@
             }
             let lastFrame = Math.max(0, ...this.layers.map((layer)=>Math.max(0, ...layer.map((src)=>src.options.at(-1).frames[1]))));
             this.timeScale = this.timelineWidth / (this.timeScale * lastFrame);
+            this.changeTimeScale(1);
             this.handleTimelineScroll();
             this.handleTimelineWidth();
             this.handleSeek();
@@ -4454,7 +4467,10 @@
           this.audioEncoderMetadata = {};
           this.ms = Math.max(...this.layers.map((layer)=>Math.max(...layer.map((src)=>src.options.at(-1).frames[1])))) / this.fps.video;
           if (this.demo) {
-            this.ms = Math.min(5000, this.ms);
+            if (this.ms > 10000) {
+              await Prompts.Error("デモ版のため、動画の長さを10秒に切り詰めます。");
+            }
+            this.ms = Math.min(10000, this.ms);
           }
           this.generatedVideoFrames = [];
           this.encodedVideoChunks = [];
@@ -4581,6 +4597,9 @@
               src.options.forEach((option)=>Object.keys(option.__option).forEach((key)=>{if(OptionValue.prototype.isPrototypeOf(option.__option[key])){option.__option[key].time = (curFrame * 1000 - src.options[0].frames[0])/(src.options[0].frames[1]-src.options[0].frames[0]);option[key]=option.__option[key];}}))
               let data = await src.getFrame(curFrame - Math.round(src.options[0].frames[0] / 1000));
               //console.log(data);
+              if (data == undefined) {
+                continue;
+              }
               if (VideoFrame.prototype.isPrototypeOf(data)) {
                 if (data.codedWidth == 0 || data.codedHeight == 0) {
                   data.close();
@@ -4620,8 +4639,17 @@
                     });
                     //console.timeEnd("i420");
                     break;
-                  case "I422":
                   case "I444":
+                    temp = new Uint8Array(data.allocationSize());
+                    [Y, U, V] = await data.copyTo(temp);
+                    console.log([Y,U,V], 1);
+                    //console.time("i420");
+                    temp = Uint32Array.from(temp.slice(Y.offset, Y.offset+Y.stride*data.displayHeight), (value, index, array)=>{
+                      let [y, cb, cr] = [Math.min(Math.max(0, (value-16)/219), 1), (temp[U.offset+Math.floor(index/(Y.stride*2))*U.stride+Math.floor((index%Y.stride)/2)] - 128) / 255, (temp[V.offset+Math.floor(index/(Y.stride*2))*V.stride+Math.floor((index%Y.stride)/2)] - 128) / 255];
+                      return (0xff000000 | (Math.min(Math.max(0, (y + cb * 1.772) * 255) >>> 0, 255) << 16)
+                        | (Math.min(Math.max(0, (y + cb * (-0.34414) + cr * (-0.71414)) * 255) >>> 0, 255) << 8)
+                        | (Math.min(Math.max(0, (y + cr * 1.402) * 255) >>> 0, 255))) >>> 0;
+                    });
                     break;
                   case "I420A":
                     temp = new Uint8Array(data.allocationSize());
@@ -4632,6 +4660,10 @@
                         | (((0xff0000 & value) + (0xff00 & value) * 2.03211) >>> 0)) >>> 0;
                     });
                     break;
+                  default:
+                    data.close();
+                    continue;
+                  
                 }
                 //console.time("scale");
                 let displayWidth = Math.round(src.options[0].width.curValue);
@@ -5410,7 +5442,9 @@
             URL.revokeObjectURL(url);
           }
 
-          outputVideoFile.close();
+          try {
+            outputVideoFile.close();
+          } catch {}
 
           await this.cleanAfterEncode();
           try {
