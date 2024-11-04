@@ -1024,7 +1024,7 @@
           this.#body = document.createElement("div");
           this.#cover = document.createElement("div");
           this.#cover.setAttribute("class", "cover");
-          this.#type = type?type.toUpperCase():"NORMAL";
+          this.#type = type?type.toUpperCase():undefined;
           setTimeout(()=>{
             var children = [...this.children, ...this.#body.children];
             this.#type = this.getAttribute("type") || this.#type;
@@ -1127,6 +1127,9 @@
         }
 
         attributeChangedCallback(name, oldValue, newValue) {
+          if (this.type == undefined) {
+            this.type = this.getAttribute("type");
+          }
           if (name=="active" && oldValue == null) {
             var rect = this.getBoundingClientRect();
             var rect2 = document.body.getBoundingClientRect();
@@ -1300,6 +1303,19 @@
     <pop-up id="loading" type="mordal">
       <div>
         <label>読み込み中...</label>
+      </div>
+    </pop-up>
+    <pop-up id="demo-description" type="mordal">
+      <div style="margin:1em;">
+        <h2>使い方</h2>
+        <p>左上の「File」→「Load project」をクリックすると、デモ用のデータが読み込まれます。</p>
+        <p>それぞれの動画要素がドラッグして移動することができます。</p>
+        <p>動画要素の長さは、動画要素をクリックで選択したあと、右上の詳細ウィンドウの「ソースの長さ」または「表示する機関」を変更することで調節できます。</p>
+        <p>エンコードするには、「File」→「Encode」をクリックして、表示されたウィンドウの「送信」ボタンを押してください。</p>
+        <p>(※「送信」というテキストですが外部に送信はされません。)</p>
+        <p>デモ用モードなので、動画の長さは10秒までで終了します。</p>
+        <p>エンコード後、出来上がった動画を再生できます。</p>
+        <button style="margin-inline: calc(50% - 3em); text-wrap: nowrap; width: 6em;" onclick="document.querySelector('pop-up#demo-description').close()">閉じる</button>
       </div>
     </pop-up>
     <pop-up id="encode">
@@ -3620,6 +3636,9 @@
             }
             Prompts.showError(element);
           }
+          if (this.demo) {
+            document.querySelector("pop-up#demo-description").activate();
+          }
           document.getElementsByName("newpro")[0].addEventListener("click", async (e)=>{
             await this.createProject();
           });
@@ -5597,13 +5616,16 @@
           }
         }
       }
-      var main = new EditorMain();
-      [[VideoSource, SOURCE_TYPES.VIDEO],
-      [AudioSource, SOURCE_TYPES.AUDIO],
-      [ImageSource, SOURCE_TYPES.IMAGE],
-      [TextSource, SOURCE_TYPES.TEXT]].forEach((i)=>{
-        let callback = i[0].check;
-        main.tree.register(i[0], callback, i[1]);
+      var main;
+      window.addEventListener("DOMContentLoaded", ()=>{
+        main = new EditorMain();
+        [[VideoSource, SOURCE_TYPES.VIDEO],
+        [AudioSource, SOURCE_TYPES.AUDIO],
+        [ImageSource, SOURCE_TYPES.IMAGE],
+        [TextSource, SOURCE_TYPES.TEXT]].forEach((i)=>{
+          let callback = i[0].check;
+          main.tree.register(i[0], callback, i[1]);
+        });
       });
     </script>
   </body>
