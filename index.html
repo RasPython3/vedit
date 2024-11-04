@@ -4563,6 +4563,10 @@
         }
 
         async encode(file, options={}) {
+          if (this.dir == undefined) {
+            await Prompts.showError("先に新規プロジェクトを作成またはプロジェクトを読み込んでね。");
+            return;
+          }
           if (this.demo) {
             file = {
               array: new Uint8Array(),
